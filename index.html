@@ -3,33 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Roboforge - Tinkercad Circuits</title>
+  <title>Roboforge - Pro Circuit Simulator</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #0f172a; color: #f1f5f9; font-family: 'Segoe UI', system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 10px; }
+    body { background: #0b0f19; color: #f1f5f9; font-family: 'Segoe UI', system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 10px; }
     header { text-align: center; margin-bottom: 8px; }
     h1 { color: #38bdf8; font-size: 16px; }
     p { color: #94a3b8; font-size: 11px; }
     
     .workspace { display: flex; flex-wrap: wrap; gap: 10px; max-width: 1250px; width: 100%; justify-content: center; }
     
-    /* Sidebar */
-    .toolbox { background: #1e293b; border-radius: 10px; padding: 10px; width: 100%; max-width: 250px; display: flex; flex-direction: column; gap: 6px; border: 1px solid #334155; }
+    /* Sidebar Toolbox */
+    .toolbox { background: #1e293b; border-radius: 12px; padding: 10px; width: 100%; max-width: 250px; display: flex; flex-direction: column; gap: 6px; border: 1px solid #334155; }
     .toolbox h3 { font-size: 12px; color: #38bdf8; border-bottom: 1px solid #334155; padding-bottom: 4px; }
     .section-title { font-size: 10px; color: #64748b; margin-top: 4px; font-weight: bold; text-transform: uppercase; }
-    .comp-btn { background: #0f172a; color: #cbd5e1; border: 1px solid #475569; padding: 7px; border-radius: 6px; text-align: left; cursor: pointer; font-size: 11px; transition: 0.2s; }
+    .comp-btn { background: #0f172a; color: #cbd5e1; border: 1px solid #475569; padding: 8px; border-radius: 6px; text-align: left; cursor: pointer; font-size: 11px; transition: 0.2s; }
     .comp-btn:hover, .comp-btn.active { background: #0284c7; color: white; border-color: #38bdf8; }
 
-    /* Circuit Canvas Area */
-    .sim-container { background: #111827; border: 2px solid #0284c7; border-radius: 10px; width: 100%; max-width: 520px; display: flex; flex-direction: column; align-items: center; padding: 10px; position: relative; }
-    canvas { background: #1e293b; border-radius: 6px; width: 100%; max-width: 500px; height: 340px; }
+    /* Canvas Simulation Container */
+    .sim-container { background: #111827; border: 2px solid #0284c7; border-radius: 12px; width: 100%; max-width: 520px; display: flex; flex-direction: column; align-items: center; padding: 10px; position: relative; }
+    canvas { background: #182232; border-radius: 8px; width: 100%; max-width: 500px; height: 380px; box-shadow: inset 0 0 15px rgba(0,0,0,0.5); }
 
     /* Inspector & Code Panel */
-    .inspector { background: #1e293b; border-radius: 10px; padding: 12px; flex: 1; min-width: 280px; max-width: 360px; display: flex; flex-direction: column; gap: 8px; border: 1px solid #334155; font-size: 12px; }
+    .inspector { background: #1e293b; border-radius: 12px; padding: 12px; flex: 1; min-width: 280px; max-width: 360px; display: flex; flex-direction: column; gap: 8px; border: 1px solid #334155; font-size: 12px; }
     .inspector h3 { font-size: 12px; color: #38bdf8; border-bottom: 1px solid #334155; padding-bottom: 4px; }
     .info-card { background: #0f172a; padding: 8px; border-radius: 6px; border: 1px solid #334155; }
     .info-card p { color: #cbd5e1; margin-top: 3px; font-size: 11px; line-height: 1.3; }
-    .code-box { font-family: monospace; font-size: 10px; color: #38bdf8; background: #020617; padding: 8px; border-radius: 4px; margin-top: 4px; border: 1px solid #1e293b; white-space: pre-wrap; max-height: 130px; overflow-y: auto; }
+    .code-box { font-family: monospace; font-size: 10px; color: #38bdf8; background: #020617; padding: 8px; border-radius: 4px; margin-top: 4px; border: 1px solid #1e293b; white-space: pre-wrap; max-height: 120px; overflow-y: auto; }
     
     .btn { background: #0284c7; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 11px; width: 100%; }
     .btn:active { transform: scale(0.97); }
@@ -38,48 +38,43 @@
 </head>
 <body>
   <header>
-    <h1>⚡ Roboforge - Tinkercad Circuits Simulator</h1>
-    <p>Platalar, Rangli Simlar va Arduino Kodlari</p>
+    <h1>⚡ Roboforge - Pro Circuit Simulator</h1>
+    <p>ESP32 va Raspberry Pi Pico Sxemalari</p>
   </header>
 
   <div class="workspace">
     <!-- Projects Selector -->
     <div class="toolbox">
-      <h3>Sxemalar</h3>
-      <div class="section-title">Asosiy Amaliyotlar</div>
-      <button class="comp-btn active" id="btn-led" onclick="loadCircuit('led')">🔴 1. LED va Rezistor</button>
-      <button class="comp-btn" id="btn-button" onclick="loadCircuit('button')">🔘 2. Push Button</button>
-      <button class="comp-btn" id="btn-pot" onclick="loadCircuit('potentiometer')">🎛️ 3. Potentiometr</button>
-
-      <div class="section-title">Sensor va Motorlar</div>
-      <button class="comp-btn" id="btn-servo" onclick="loadCircuit('servo')">⚙️ 4. Servo Motor (SG90)</button>
-      <button class="comp-btn" id="btn-ultrasonic" onclick="loadCircuit('ultrasonic')">📡 5. HC-SR04 Sensor</button>
-      <button class="comp-btn" id="btn-lcd" onclick="loadCircuit('lcd')">📟 6. ESP32 & LCD Displey</button>
+      <h3>Loyihalar</h3>
+      <div class="section-title">Sxemalar</div>
+      <button class="comp-btn active" id="btn-esp" onclick="loadCircuit('esp32')">💡 1. ESP32 & Dual LEDs</button>
+      <button class="comp-btn" id="btn-pico" onclick="loadCircuit('pico')">🔄 2. Pico & Stepper Motor</button>
     </div>
 
     <!-- Canvas Simulation Window -->
     <div class="sim-container">
-      <canvas id="circuitCanvas" width="500" height="340"></canvas>
+      <canvas id="circuitCanvas" width="500" height="380"></canvas>
       <p id="sim-status" style="color: #4ade80; margin-top: 8px; font-size: 11px;">Holat: Tayyor (Simulyatsiya to'xtatilgan)</p>
     </div>
 
     <!-- Inspector & Code Panel -->
     <div class="inspector">
-      <h3>Ulanish va Kod</h3>
+      <h3>Ma'lumot va Dastur</h3>
       <div class="info-card">
-        <strong id="info-title">LED va Rezistor Ulanishi</strong>
-        <p id="info-desc">Arduino D13 pinidan rezistor orqali LED anodiga quvvat beriladi.</p>
+        <strong id="info-title">ESP32 & Dual LEDs</strong>
+        <p id="info-desc">ESP32 platasi yordamida qizil va ko'k LED chiroqlarini boshqarish.</p>
         <div class="code-box" id="code-snippet">void setup() {
-  pinMode(13, OUTPUT);
+  pinMode(22, OUTPUT);
+  pinMode(23, OUTPUT);
 }
 void loop() {
-  digitalWrite(13, HIGH);
+  digitalWrite(22, HIGH);
   delay(1000);
-  digitalWrite(13, LOW);
+  digitalWrite(22, LOW);
   delay(1000);
 }</div>
       </div>
-      <button class="btn btn-green" onclick="toggleSimulation()">⚡ Simulyatsiyani Boshlash (Start Simulation)</button>
+      <button class="btn btn-green" onclick="toggleSimulation()">⚡ Simulyatsiyani Boshlash (Start)</button>
     </div>
   </div>
 
@@ -87,128 +82,98 @@ void loop() {
     const canvas = document.getElementById('circuitCanvas');
     const ctx = canvas.getContext('2d');
 
+    let currentCircuit = 'esp32';
+    let isRunning = false;
+    let angle = 307.8;
+
     const circuits = {
-      led: {
-        title: "LED va Rezistor Ulanishi",
-        desc: "Arduino D13 pinidan chiqqan quvvat 220Ω rezistor orqali LED anodiga (+) boradi.",
-        code: "void setup() {\n  pinMode(13, OUTPUT);\n}\nvoid loop() {\n  digitalWrite(13, HIGH);\n  delay(500);\n  digitalWrite(13, LOW);\n  delay(500);\n}",
-        draw: (isRunning) => {
-          // Arduino Board
-          ctx.fillStyle = "#0284c7"; ctx.fillRect(30, 80, 140, 180);
-          ctx.fillStyle = "#ffffff"; ctx.font = "bold 11px sans-serif"; ctx.fillText("Arduino Uno", 60, 105);
+      esp32: {
+        title: "ESP32 & Dual LEDs",
+        desc: "ESP32 mikrokontrolleri, qizil va ko'k LEDlar, rezistorlar va tugma ulanishi.",
+        code: "void setup() {\n  pinMode(22, OUTPUT);\n  pinMode(23, OUTPUT);\n  pinMode(4, INPUT_PULLUP);\n}\nvoid loop() {\n  digitalWrite(22, HIGH);\n  delay(500);\n}",
+        draw: () => {
+          // --- ESP32 Board ---
+          ctx.fillStyle = "#1e293b"; ctx.fillRect(40, 60, 110, 240);
+          ctx.fillStyle = "#334155"; ctx.fillRect(60, 90, 70, 100);
+          ctx.fillStyle = "#ffffff"; ctx.font = "bold 11px sans-serif"; ctx.fillText("ESP32", 76, 145);
           
-          // Breadboard
-          ctx.fillStyle = "#f8fafc"; ctx.fillRect(280, 70, 180, 200);
-          ctx.fillStyle = "#64748b"; ctx.font = "10px sans-serif"; ctx.fillText("Maket Platasi (Breadboard)", 295, 90);
-          
-          // Resistor
-          ctx.fillStyle = "#eab308"; ctx.fillRect(330, 150, 40, 12);
-          
-          // LED
-          ctx.fillStyle = isRunning ? "#ef4444" : "#7f1d1d";
-          ctx.beginPath(); ctx.arc(400, 156, 14, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = "#fbbf24";
+          for(let i=0; i<10; i++) {
+            ctx.fillRect(34, 75 + i*20, 6, 8);
+            ctx.fillRect(150, 75 + i*20, 6, 8);
+          }
 
-          // Wires (Tinkercad style)
-          // Wire 1: D13 to Resistor (Yellow/Orange)
-          ctx.strokeStyle = "#f97316"; ctx.lineWidth = 3;
-          ctx.beginPath(); ctx.moveTo(170, 140); ctx.lineTo(250, 140); ctx.lineTo(250, 156); ctx.lineTo(330, 156); ctx.stroke();
+          // --- Push Button ---
+          ctx.fillStyle = "#16a34a"; ctx.beginPath(); ctx.arc(360, 260, 18, 0, Math.PI*2); ctx.fill();
+          ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(360, 260, 8, 0, Math.PI*2); ctx.fill();
+
+          // --- Resistors & LEDs ---
+          ctx.fillStyle = "#eab308"; ctx.fillRect(315, 110, 12, 35);
+          ctx.fillStyle = isRunning ? "#ef4444" : "#7f1d1d"; ctx.beginPath(); ctx.arc(321, 75, 12, 0, Math.PI*2); ctx.fill();
           
-          // Wire 2: GND to LED Cathode (Black)
-          ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 3;
-          ctx.beginPath(); ctx.moveTo(170, 220); ctx.lineTo(230, 220); ctx.lineTo(230, 190); ctx.lineTo(415, 190); ctx.lineTo(415, 170); ctx.stroke();
+          ctx.fillStyle = "#eab308"; ctx.fillRect(395, 110, 12, 35);
+          ctx.fillStyle = isRunning ? "#3b82f6" : "#1e3a8a"; ctx.beginPath(); ctx.arc(401, 75, 12, 0, Math.PI*2); ctx.fill();
+
+          // --- Clean 90-degree Wires ---
+          ctx.strokeStyle = "#22c55e"; ctx.lineWidth = 2.5;
+          ctx.beginPath(); ctx.moveTo(150, 115); ctx.lineTo(250, 115); ctx.lineTo(250, 125); ctx.lineTo(315, 125); ctx.stroke();
+
+          ctx.strokeStyle = "#38bdf8"; ctx.lineWidth = 2.5;
+          ctx.beginPath(); ctx.moveTo(150, 135); ctx.lineTo(270, 135); ctx.lineTo(270, 125); ctx.lineTo(395, 125); ctx.stroke();
+
+          ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 2.5;
+          ctx.beginPath(); ctx.moveTo(150, 215); ctx.lineTo(240, 215); ctx.lineTo(240, 260); ctx.lineTo(342, 260); ctx.stroke();
         }
       },
-      button: {
-        title: "Push Button (Kнопка)",
-        desc: "Tugma bosilganda D2 piniga HIGH signali uzatiladi.",
-        code: "const int buttonPin = 2;\nvoid setup() {\n  pinMode(buttonPin, INPUT_PULLUP);\n  Serial.begin(9600);\n}\nvoid loop() {\n  int state = digitalRead(buttonPin);\n  Serial.println(state);\n}",
-        draw: (isRunning) => {
-          ctx.fillStyle = "#0284c7"; ctx.fillRect(30, 80, 140, 180);
-          ctx.fillStyle = "#ffffff"; ctx.fillText("Arduino Uno", 60, 105);
-          
-          ctx.fillStyle = "#f8fafc"; ctx.fillRect(280, 70, 180, 200);
-          ctx.fillStyle = "#334155"; ctx.fillRect(350, 130, 50, 50); // Button
-          
-          // Wires
-          ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 3; // 5V
-          ctx.beginPath(); ctx.moveTo(170, 120); ctx.lineTo(330, 120); ctx.stroke();
+      pico: {
+        title: "Raspberry Pi Pico & Stepper Motor",
+        desc: "Raspberry Pi Pico, A4988 drayveri va Stepper motor ulanishi.",
+        code: "#include <Stepper.h>\nconst int stepsPerRevolution = 200;\nStepper myStepper(stepsPerRevolution, 2, 3);\nvoid setup() {\n  myStepper.setSpeed(60);\n}\nvoid loop() {\n  myStepper.step(stepsPerRevolution);\n}",
+        draw: () => {
+          // --- Stepper Motor ---
+          ctx.fillStyle = "#64748b"; ctx.fillRect(180, 40, 140, 140);
+          ctx.fillStyle = "#475569"; ctx.beginPath(); ctx.arc(250, 110, 50, 0, Math.PI*2); ctx.fill();
+          ctx.fillStyle = "#1e293b"; ctx.beginPath(); ctx.arc(250, 110, 18, 0, Math.PI*2); ctx.fill();
+          ctx.fillStyle = "#38bdf8"; ctx.font = "bold 13px sans-serif"; ctx.fillText(angle.toFixed(1) + "°", 225, 115);
+          ctx.fillStyle = "#cbd5e1"; ctx.font = "10px sans-serif"; ctx.fillText("degrees", 228, 130);
 
-          ctx.strokeStyle = "#38bdf8"; ctx.lineWidth = 3; // Signal
-          ctx.beginPath(); ctx.moveTo(170, 170); ctx.lineTo(350, 170); ctx.stroke();
-        }
-      },
-      potentiometer: {
-        title: "Potentiometr (Analog Input)",
-        desc: "O'zgaruvchan rezistor orqali A0 piniga analog qiymat beriladi.",
-        code: "void setup() {\n  Serial.begin(9600);\n}\nvoid loop() {\n  int val = analogRead(A0);\n  Serial.println(val);\n  delay(100);\n}",
-        draw: (isRunning) => {
-          ctx.fillStyle = "#0284c7"; ctx.fillRect(30, 80, 140, 180);
-          ctx.fillStyle = "#ffffff"; ctx.fillText("Arduino Uno", 60, 105);
+          ctx.fillStyle = "#cbd5e1";
+          ctx.beginPath(); ctx.arc(195, 55, 5, 0, Math.PI*2); ctx.fill();
+          ctx.beginPath(); ctx.arc(305, 55, 5, 0, Math.PI*2); ctx.fill();
+          ctx.beginPath(); ctx.arc(195, 165, 5, 0, Math.PI*2); ctx.fill();
+          ctx.beginPath(); ctx.arc(305, 165, 5, 0, Math.PI*2); ctx.fill();
+
+          // --- Raspberry Pi Pico ---
+          ctx.fillStyle = "#16a34a"; ctx.fillRect(60, 200, 110, 150);
+          ctx.fillStyle = "#ffffff"; ctx.font = "bold 10px sans-serif"; ctx.fillText("Raspberry", 85, 260);
+          ctx.fillStyle = "#ffffff"; ctx.font = "8px sans-serif"; ctx.fillText("Pi Pico", 95, 275);
+          ctx.fillStyle = "#334155"; ctx.fillRect(95, 210, 40, 20);
+
+          // --- A4988 Driver ---
+          ctx.fillStyle = "#15803d"; ctx.fillRect(280, 230, 60, 70);
+          ctx.fillStyle = "#000000"; ctx.fillRect(295, 245, 30, 30);
+          ctx.fillStyle = "#ffffff"; ctx.font = "bold 8px sans-serif"; ctx.fillText("A4988", 293, 292);
+
+          // --- Wires ---
+          ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(230, 180); ctx.lineTo(230, 210); ctx.lineTo(290, 210); ctx.lineTo(290, 230); ctx.stroke();
           
-          ctx.fillStyle = "#64748b"; ctx.beginPath(); ctx.arc(370, 160, 25, 0, Math.PI*2); ctx.fill(); // Pot
-          
-          ctx.strokeStyle = "#22c55e"; ctx.lineWidth = 3; // A0
-          ctx.beginPath(); ctx.moveTo(170, 180); ctx.lineTo(345, 160); ctx.stroke();
-        }
-      },
-      servo: {
-        title: "Servo Motor (SG90) Boshqaruvi",
-        desc: "PWM signal yordamida servo motor burchagi boshqariladi.",
-        code: "#include <Servo.h>\nServo myservo;\nvoid setup() {\n  myservo.attach(9);\n}\nvoid loop() {\n  myservo.write(90);\n  delay(1000);\n}",
-        draw: (isRunning) => {
-          ctx.fillStyle = "#0284c7"; ctx.fillRect(30, 80, 140, 180);
-          ctx.fillStyle = "#ffffff"; ctx.fillText("Arduino Uno", 60, 105);
-          
-          ctx.fillStyle = "#f59e0b"; ctx.fillRect(330, 130, 80, 60); // Servo
-          ctx.fillStyle = "#ffffff"; ctx.fillText("SG90", 355, 165);
+          ctx.strokeStyle = "#3b82f6"; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(240, 180); ctx.lineTo(240, 205); ctx.lineTo(305, 205); ctx.lineTo(305, 230); ctx.stroke();
 
-          // Wires: Brown, Red, Orange
-          ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 3; // VCC
-          ctx.beginPath(); ctx.moveTo(170, 120); ctx.lineTo(330, 120); ctx.stroke();
+          ctx.strokeStyle = "#a855f7"; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(170, 310); ctx.lineTo(230, 310); ctx.lineTo(230, 270); ctx.lineTo(280, 270); ctx.stroke();
 
-          ctx.strokeStyle = "#eab308"; ctx.lineWidth = 3; // PWM
-          ctx.beginPath(); ctx.moveTo(170, 160); ctx.lineTo(330, 160); ctx.stroke();
-        }
-      },
-      ultrasonic: {
-        title: "HC-SR04 Ultrasonik Sensor",
-        desc: "Trig va Echo pinlari yordamida masofa o'lchanadi.",
-        code: "const int trigPin = 7;\nconst int echoPin = 6;\nvoid setup() {\n  pinMode(trigPin, OUTPUT);\n  pinMode(echoPin, INPUT);\n}\nvoid loop() { }",
-        draw: (isRunning) => {
-          ctx.fillStyle = "#0284c7"; ctx.fillRect(30, 80, 140, 180);
-          ctx.fillStyle = "#ffffff"; ctx.fillText("Arduino Uno", 60, 105);
-
-          ctx.fillStyle = "#3b82f6"; ctx.fillRect(320, 130, 90, 50); // Sensor
-          ctx.fillStyle = "#ffffff"; ctx.fillText("HC-SR04", 340, 160);
-          
-          ctx.strokeStyle = "#38bdf8"; ctx.lineWidth = 3;
-          ctx.beginPath(); ctx.moveTo(170, 150); ctx.lineTo(320, 150); ctx.stroke();
-        }
-      },
-      lcd: {
-        title: "ESP32 va I2C LCD Displey",
-        desc: "I2C protokoli (SDA, SCL) orqali ESP32 platasiga LCD ulanishi.",
-        code: "#include <LiquidCrystal_I2C.h>\nLiquidCrystal_I2C lcd(0x27, 16, 2);\nvoid setup() {\n  lcd.init();\n  lcd.backlight();\n  lcd.print(\"Roboforge\");\n}\nvoid loop() { }",
-        draw: (isRunning) => {
-          ctx.fillStyle = "#334155"; ctx.fillRect(30, 80, 140, 180);
-          ctx.fillStyle = "#ffffff"; ctx.fillText("ESP32 DevKit", 60, 105);
-
-          ctx.fillStyle = "#10b981"; ctx.fillRect(300, 120, 130, 70); // LCD
-          ctx.fillStyle = "#022c22"; ctx.fillText("Roboforge...", 325, 160);
-
-          ctx.strokeStyle = "#eab308"; ctx.lineWidth = 3; // SDA/SCL
-          ctx.beginPath(); ctx.moveTo(170, 180); ctx.lineTo(300, 180); ctx.stroke();
+          ctx.strokeStyle = "#f97316"; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(170, 325); ctx.lineTo(240, 325); ctx.lineTo(240, 285); ctx.lineTo(280, 285); ctx.stroke();
         }
       }
     };
 
-    let currentKey = 'led';
-    let simulationActive = false;
-
     function loadCircuit(key) {
-      currentKey = key;
+      currentCircuit = key;
       document.querySelectorAll('.comp-btn').forEach(btn => btn.classList.remove('active'));
-      document.getElementById('btn-' + key).classList.add('active');
+      document.getElementById(key === 'esp32' ? 'btn-esp' : 'btn-pico').classList.add('active');
 
       const data = circuits[key];
       document.getElementById('info-title').innerText = data.title;
@@ -220,24 +185,32 @@ void loop() {
 
     function redraw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      circuits[currentKey].draw(simulationActive);
+      circuits[currentCircuit].draw();
     }
 
     function toggleSimulation() {
-      simulationActive = !simulationActive;
+      isRunning = !isRunning;
       const statusEl = document.getElementById('sim-status');
-      if (simulationActive) {
-        statusEl.innerText = "🟢 Simulyatsiya ishlamqda (Tok uzatildi)";
+      if (isRunning) {
+        statusEl.innerText = "🟢 Simulyatsiya ishlamqda...";
         statusEl.style.color = "#38bdf8";
       } else {
-        statusEl.innerText = "Holat: Tayyor (Simulyatsiya to'xtatilgan)";
+        statusEl.innerText = "Holat: Tayyor (To'xtatilgan)";
         statusEl.style.color = "#4ade80";
       }
       redraw();
     }
 
-    // Initial load
-    loadCircuit('led');
+    setInterval(() => {
+      if (isRunning && currentCircuit === 'pico') {
+        angle = (angle + 2.5) % 360;
+        redraw();
+      } else if (isRunning && currentCircuit === 'esp32') {
+        redraw();
+      }
+    }, 100);
+
+    loadCircuit('esp32');
   </script>
 </body>
 </html>
