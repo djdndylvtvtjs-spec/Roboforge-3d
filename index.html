@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RoboCraft Ko'p Platalik Apparat Simulyatori</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 15px;
+      background: #090d16;
+      color: #f1f5f9;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 { color: #38bdf8; margin: 0 0 5px 0; font-size: 22px; text-align: center; }
+    p { color: #94a3b8; font-size: 13px; margin: 0 0 15px 0; text-align: center; }
+    
+    #main-layout {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 1100px;
+      width: 100%;
+    }
+    
+    canvas {
+      background: #111827;
+      border: 2px solid #0284c7;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(2, 132, 199, 0.25);
+    }
+
+    .dashboard {
+      flex: 1;
+      min-width: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .card h3 {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      color: #38bdf8;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    select, button {
+      width: 100%;
+      padding: 8px 10px;
+      background: #0f172a;
+      border: 1px solid #38bdf8;
+      color: #f8fafc;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+    
+    button.primary { background: #0284c7; }
+    button.primary:hover { background: #0369a1; }
+    button.danger { background: #e11d48; border-color: #f43f5e; }
+    
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    
+    .pin-badge {
+      background: #0f172a;
+      padding: 6px 8px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 11px;
+      border-left: 3px solid #64748b;
+    }
+    .pin-badge.active { border-color: #22c55e; color: #4ade80; }
+    
+    .oled-screen {
+      background: #000;
+      border: 2px solid #3b82f6;
+      border-radius: 4px;
+      padding: 8px;
+      font-family: 'Courier New', monospace;
+      color: #38bdf8;
+      font-size: 11px;
+      height: 70px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🤖 RoboCraft Ko'p Platalik Apparat Simulyatori</h1>
+  <p>ESP32 / Arduino / L298N / Servo / OLED / IR Chiziq Sensorlari Integratsiyalangan Simulyator (To'liq O'zbekcha)</p>
+
+  <div id="main-layout">
+    <canvas id="canvas" width="550" height="420"></canvas>
+
+    <div class="dashboard">
+      <!-- Platalar Sozlamasi -->
+      <div class="card">
+        <h3>🎛️ Boshqaruv Platasi (Mikrokontroller)</h3>
+        <select id="mcuSelect" onchange="changeMCU()">
+          <option value="ESP32">ESP32 DevKit V1 (Wi-Fi + Bluetooth + Sun'iy Intellekt)</option>
+          <option value="ARDUINO">Arduino Uno R3 (ATmega328P)</option>
+          <option value="STM32">STM32F103C8T6 (Blue Pill ARM)</option>
+        </select>
+        <button class="primary" onclick="toggleDriveMode()" id="modeBtn">Autopilot (Avtonom Algoritm)</button>
+      </div>
+
+      <!-- Virtual OLED Ekran -->
+      <div class="card">
+        <h3>📺 SSD1306 OLED Ekran (I2C 0x3C)</h3>
+        <div class="oled-screen" id="oled">
+          <div>TIZIM: ISHGA TUSHMOQDA...</div>
+          <div>PLATA: ESP32-WROOM</div>
+          <div>TEZLIK: 0 RPM | MASOFA: 0sm</div>
+        </div>
+      </div>
+
+      <!-- Apparat Monitoring -->
+      <div class="card">
+        <h3>⚡ L298N Motor Drayver va Pinlar</h3>
+        <div class="grid-2">
+          <div class="pin-badge" id="pinIN1">IN1 (Chap Old): PAST (0)</div>
+          <div class="pin-badge" id="pinIN2">IN2 (Chap Orqa): PAST (0)</div>
+          <div class="pin-badge" id="pinIN3">IN3 (O'ng Old): PAST (0)</div>
+          <div class="pin-badge" id="pinIN4">IN4 (O'ng Orqa): PAST (0)</div>
+        </div>
+      </div>
+
+      <!-- Sensorlar Telemetriyasi -->
+      <div class="card">
+        <h3>📡 Sensorlar va Ijrochi Mexanizmlar</h3>
+        <div class="grid-2">
+          <div class="pin-badge" id="sr04Val">HC-SR04: 0 sm</div>
+          <div class="pin-badge" id="servoVal">SG90 Servo: 90°</div>
+          <div class="pin-badge" id="irLeft">IR Sol: OQ (0)</div>
+          <div class="pin-badge" id="irRight">IR O'ng: OQ (0)</div>
+        </div>
+        <button class="danger" onclick="resetSim()" style="margin-top:8px;">Tizimni Qayta Yuklash (Reset)</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    let selectedMCU = "ESP32";
+    let isAuto = false;
+
+    let robot = {
+      x: 80, y: 360,
+      angle: -Math.PI / 2,
+      speed: 0,
+      size: 32,
+      sensorDist: 100,
+      servoAngle: 0,
+      servoDir: 0.03,
+      irLeftState: 0,
+      irRightState: 0
+    };
+
+    const obstacles = [
+      {x: 140, y: 180, w: 200, h: 30},
+      {x: 280, y: 280, w: 180, h: 30},
+      {x: 80, y: 80, w: 320, h: 30}
+    ];
+    const finishZone = {x: 450, y: 20, w: 70, h: 60};
+
+    let keys = {};
+    window.addEventListener("keydown", e => keys[e.code] = true);
+    window.addEventListener("keyup", e => keys[e.code] = false);
+
+    function changeMCU() {
+      selectedMCU = document.getElementById("mcuSelect").value;
+      updateOLED("PLATA O'ZGARTIRILDI", `FAOL: ${selectedMCU}`);
+    }
+
+    function toggleDriveMode() {
+      isAuto = !isAuto;
+      document.getElementById("modeBtn").innerText = isAuto ? "Qo'lda Boshqaruvga O'tish" : "Autopilot (Avtonom Algoritm)";
+    }
+
+    function resetSim() {
+      robot.x = 80; robot.y = 360; robot.angle = -Math.PI / 2; robot.speed = 0;
+      updateOLED("TIZIM QAYTA YUKLANDI", "TAYYOR...");
+    }
+
+    function updateOLED(line1, line2) {
+      document.getElementById("oled").innerHTML = `
+        <div>[ ${selectedMCU} ISHLAMOQDA ]</div>
+        <div>${line1}</div>
+        <div>${line2}</div>
+      `;
+    }
+
+    function updateSensors() {
+      robot.servoAngle += robot.servoDir;
+      if (Math.abs(robot.servoAngle) > 0.6) robot.servoDir *= -1;
+
+      let rayAngle = robot.angle + robot.servoAngle;
+      let rx = robot.x, ry = robot.y;
+      let maxD = 180;
+      let d = maxD;
+
+      for (let i = 0; i < maxD; i += 4) {
+        rx += Math.cos(rayAngle) * 4;
+        ry += Math.sin(rayAngle) * 4;
+
+        if (rx < 0 || rx > canvas.width || ry < 0 || ry > canvas.height) { d = i; break; }
+        for (let obs of obstacles) {
+          if (rx > obs.x && rx < obs.x + obs.w && ry > obs.y && ry < obs.y + obs.h) { d = i; break; }
+        }
+        if (d < maxD) break;
+      }
+
+      robot.sensorDist = Math.round(d);
+
+      document.getElementById("sr04Val").innerText = `HC-SR04: ${robot.sensorDist} sm`;
+      document.getElementById("servoVal").innerText = `SG90 Servo: ${Math.round(90 + robot.servoAngle*57.3)}°`;
+      
+      document.getElementById("irLeft").innerText = `IR Sol: ${robot.sensorDist < 40 ? 'QORA (1)' : 'OQ (0)'}`;
+      document.getElementById("irRight").innerText = `IR O'ng: ${robot.sensorDist < 40 ? 'QORA (1)' : 'OQ (0)'}`;
+    }
+
+    function updateMotorPins(in1, in2, in3, in4) {
+      const setPin = (id, label, val) => {
+        const el = document.getElementById(id);
+        el.innerText = `${label}: ${val ? 'YUQORI (1)' : 'PAST (0)'}`;
+        if(val) el.classList.add("active"); else el.classList.remove("active");
+      };
+      setPin("pinIN1", "IN1 (Chap Old)", in1);
+      setPin("pinIN2", "IN2 (Chap Orqa)", in2);
+      setPin("pinIN3", "IN3 (O'ng Old)", in3);
+      setPin("pinIN4", "IN4 (O'ng Orqa)", in4);
+    }
+
+    function logic() {
+      updateSensors();
+
+      let in1=0, in2=0, in3=0, in4=0;
+
+      if (isAuto) {
+        if (robot.sensorDist < 45) {
+          robot.angle += 0.07;
+          robot.speed = 0.8;
+          in1=1; in2=0; in3=0; in4=1;
+          updateOLED("TO'SIQ ANIQLANDI!", "AVTONOM BURILISH");
+        } else {
+          robot.speed = 2.2;
+          in1=1; in2=0; in3=1; in4=0;
+          updateOLED(`TEZLIK: ${Math.round(robot.speed*100)} RPM`, `MASOFA: ${robot.sensorDist}sm`);
+        }
+      } else {
+        if (keys["ArrowUp"]) { robot.speed = 2.2; in1=1; in2=0; in3=1; in4=0; }
+        else if (keys["ArrowDown"]) { robot.speed = -1.5; in1=0; in2=1; in3=0; in4=1; }
+        else { robot.speed = 0; }
+
+        if (keys["ArrowLeft"]) { robot.angle -= 0.05; in1=0; in2=1; in3=1; in4=0; }
+        if (keys["ArrowRight"]) { robot.angle += 0.05; in1=1; in2=0; in3=0; in4=1; }
+
+        updateOLED("QO'LDA BOSHQARISH", `PINLAR: ${in1}${in2}${in3}${in4}`);
+      }
+
+      updateMotorPins(in1, in2, in3, in4);
+
+      robot.x += Math.cos(robot.angle) * robot.speed;
+      robot.y += Math.sin(robot.angle) * robot.speed;
+    }
+
+    function render() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Finish zone
+      ctx.fillStyle = "#10b981";
+      ctx.fillRect(finishZone.x, finishZone.y, finishZone.w, finishZone.h);
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 12px sans-serif";
+      ctx.fillText("MARRA", finishZone.x + 12, finishZone.y + 35);
+
+      // To'siqlar
+      ctx.fillStyle = "#334155";
+      for (let obs of obstacles) ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+
+      // Servo + HC-SR04 Radar nuri
+      ctx.strokeStyle = "rgba(56, 189, 248, 0.4)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(robot.x, robot.y);
+      let rayA = robot.angle + robot.servoAngle;
+      ctx.lineTo(robot.x + Math.cos(rayA)*robot.sensorDist, robot.y + Math.sin(rayA)*robot.sensorDist);
+      ctx.stroke();
+
+      // Robot
+      ctx.save();
+      ctx.translate(robot.x, robot.y);
+      ctx.rotate(robot.angle);
+
+      ctx.fillStyle = "#1e293b";
+      ctx.strokeStyle = "#38bdf8";
+      ctx.lineWidth = 2;
+      ctx.fillRect(-robot.size/2, -robot.size/2, robot.size, robot.size);
+      ctx.strokeRect(-robot.size/2, -robot.size/2, robot.size, robot.size);
+
+      ctx.fillStyle = "#0f172a";
+      ctx.fillRect(-robot.size/2, -robot.size/2 - 5, 12, 4);
+      ctx.fillRect(-robot.size/2, robot.size/2 + 1, 12, 4);
+      ctx.fillRect(robot.size/2 - 12, -robot.size/2 - 5, 12, 4);
+      ctx.fillRect(robot.size/2 - 12, robot.size/2 + 1, 12, 4);
+
+      if (selectedMCU === "ESP32") ctx.fillStyle = "#ef4444";
+      else if (selectedMCU === "ARDUINO") ctx.fillStyle = "#0284c7";
+      else ctx.fillStyle = "#2563eb";
+
+      ctx.fillRect(-8, -8, 16, 16);
+
+      ctx.fillStyle = "#f59e0b";
+      ctx.fillRect(robot.size/2 - 4, -5, 6, 10);
+
+      ctx.restore();
+    }
+
+    function loop() {
+      logic();
+      render();
+      requestAnimationFrame(loop);
+    }
+
+    loop();
+  </script>
+</body>
+</html>
