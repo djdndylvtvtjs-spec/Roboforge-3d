@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RoboCraft 3D - Yig'ish va Sochish Simulyatori</title>
+  <title>RoboCraft 3D Assembler</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #090d16; color: #f1f5f9; font-family: 'Segoe UI', system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 10px; }
@@ -68,19 +68,16 @@
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
 
-    // Yorug'lik
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
     scene.add(ambientLight);
     const dirLight = new THREE.DirectionalLight(0x38bdf8, 1.2);
     dirLight.position.set(5, 10, 5);
     scene.add(dirLight);
 
-    // Tor katakli zamin (Grid)
     const grid = new THREE.GridHelper(10, 20, 0x0284c7, 0x1e293b);
     grid.position.y = -1;
     scene.add(grid);
 
-    // --- ROBOT QISMLARI (PARTS) ---
     const parts = [];
 
     function addPart(mesh, name, originPos, explodedPos) {
@@ -94,19 +91,16 @@
       });
     }
 
-    // 1. Karkas (Chassis) - Asos
     const chassisGeo = new THREE.BoxGeometry(2.2, 0.15, 3);
     const chassisMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 });
     const chassis = new THREE.Mesh(chassisGeo, chassisMat);
-    addPart(chassis, "Korpus (Chassis)", new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, -0.5, 0));
+    addPart(chassis, "Chassis", new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, -0.5, 0));
 
-    // 2. Mikrokontroller (Arduino / ESP32)
     const boardGeo = new THREE.BoxGeometry(1.6, 0.1, 2);
     const boardMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.3 });
     const board = new THREE.Mesh(boardGeo, boardMat);
-    addPart(board, "Boshqaruv Platalari", new THREE.Vector3(0, 0.15, 0), new THREE.Vector3(0, 1.2, 0));
+    addPart(board, "Microcontroller", new THREE.Vector3(0, 0.15, 0), new THREE.Vector3(0, 1.2, 0));
 
-    // 3. Ultratovushli Sensor
     const sensorGroup = new THREE.Group();
     const sensorBaseGeo = new THREE.BoxGeometry(0.8, 0.3, 0.1);
     const sensorMat = new THREE.MeshStandardMaterial({ color: 0x3b82f6 });
@@ -121,39 +115,30 @@
     const eye2 = eye1.clone();
     eye2.position.set(0.2, 0, 0.08);
     sensorGroup.add(eye1, eye2);
-    addPart(sensorGroup, "Ultratovush Sensori", new THREE.Vector3(0, 0.3, 1.4), new THREE.Vector3(0, 1.0, 2.5));
+    addPart(sensorGroup, "Ultrasonic Sensor", new THREE.Vector3(0, 0.3, 1.4), new THREE.Vector3(0, 1.0, 2.5));
 
-    // 4. Chap G'ildirak + Mator
     const wheelGeo = new THREE.CylinderGeometry(0.45, 0.45, 0.2, 24);
     const wheelMat = new THREE.MeshStandardMaterial({ color: 0xef4444 });
     
     const wheelL = new THREE.Mesh(wheelGeo, wheelMat);
     wheelL.rotation.z = Math.PI / 2;
-    addPart(wheelL, "Chap G'ildirak", new THREE.Vector3(-1.25, 0, 0.5), new THREE.Vector3(-2.3, 0, 0.5));
+    addPart(wheelL, "Left Wheel", new THREE.Vector3(-1.25, 0, 0.5), new THREE.Vector3(-2.3, 0, 0.5));
 
-    // 5. O'ng G'ildirak + Mator
     const wheelR = new THREE.Mesh(wheelGeo, wheelMat);
     wheelR.rotation.z = Math.PI / 2;
-    addPart(wheelR, "O'ng G'ildirak", new THREE.Vector3(1.25, 0, 0.5), new THREE.Vector3(2.3, 0, 0.5));
+    addPart(wheelR, "Right Wheel", new THREE.Vector3(1.25, 0, 0.5), new THREE.Vector3(2.3, 0, 0.5));
 
-    // 6. Batareya Bloki
     const battGeo = new THREE.BoxGeometry(1.2, 0.3, 0.8);
     const battMat = new THREE.MeshStandardMaterial({ color: 0xeab308 });
     const batt = new THREE.Mesh(battGeo, battMat);
-    addPart(batt, "Batareya Quvvat Manbai", new THREE.Vector3(0, 0.25, -0.9), new THREE.Vector3(0, 1.5, -1.8));
+    addPart(batt, "Battery", new THREE.Vector3(0, 0.25, -0.9), new THREE.Vector3(0, 1.5, -1.8));
 
-
-    // --- MANTIQLAR VA ANIMATSIYA ---
     let currentFactor = 0;
     let targetFactor = 0;
-    let isAnimating = false;
 
     function setExplodeFactor(val) {
       targetFactor = val / 100;
       document.getElementById('explodeVal').innerText = val + '%';
-      if (val == 100) logStatus("Robot to'liq sochildi 🧩");
-      else if (val == 0) logStatus("Robot to'liq yig'ildi 🛠");
-      else logStatus(`Sochilish darajasi: ${val}%`);
     }
 
     function animateTo(val) {
@@ -163,17 +148,10 @@
 
     function toggleAutoRotate() {
       controls.autoRotate = !controls.autoRotate;
-      logStatus(controls.autoRotate ? "Avto-aylantirish yoqildi 🔄" : "Avto-aylantirish o'chirildi");
-    }
-
-    function logStatus(msg) {
-      document.getElementById('status-log').innerText = '> ' + msg;
     }
 
     function animate() {
       requestAnimationFrame(animate);
-      
-      // Slayder harakatini tekis silliqlash (Lerp)
       currentFactor += (targetFactor - currentFactor) * 0.1;
 
       parts.forEach(part => {
@@ -195,3 +173,4 @@
   </script>
 </body>
 </html>
+
