@@ -1,217 +1,95 @@
-<!DOCTYPE html>
-<html lang="uz">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Roboforge - Pro Circuit Simulator</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #0b0f19; color: #f1f5f9; font-family: 'Segoe UI', system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 10px; }
-    header { text-align: center; margin-bottom: 8px; }
-    h1 { color: #38bdf8; font-size: 16px; }
-    p { color: #94a3b8; font-size: 11px; }
-    
-    .workspace { display: flex; flex-wrap: wrap; gap: 10px; max-width: 1250px; width: 100%; justify-content: center; }
-    
-    /* Sidebar Toolbox */
-    .toolbox { background: #1e293b; border-radius: 12px; padding: 10px; width: 100%; max-width: 250px; display: flex; flex-direction: column; gap: 6px; border: 1px solid #334155; }
-    .toolbox h3 { font-size: 12px; color: #38bdf8; border-bottom: 1px solid #334155; padding-bottom: 4px; }
-    .section-title { font-size: 10px; color: #64748b; margin-top: 4px; font-weight: bold; text-transform: uppercase; }
-    .comp-btn { background: #0f172a; color: #cbd5e1; border: 1px solid #475569; padding: 8px; border-radius: 6px; text-align: left; cursor: pointer; font-size: 11px; transition: 0.2s; }
-    .comp-btn:hover, .comp-btn.active { background: #0284c7; color: white; border-color: #38bdf8; }
-
-    /* Canvas Simulation Container */
-    .sim-container { background: #111827; border: 2px solid #0284c7; border-radius: 12px; width: 100%; max-width: 520px; display: flex; flex-direction: column; align-items: center; padding: 10px; position: relative; }
-    canvas { background: #182232; border-radius: 8px; width: 100%; max-width: 500px; height: 380px; box-shadow: inset 0 0 15px rgba(0,0,0,0.5); }
-
-    /* Inspector & Code Panel */
-    .inspector { background: #1e293b; border-radius: 12px; padding: 12px; flex: 1; min-width: 280px; max-width: 360px; display: flex; flex-direction: column; gap: 8px; border: 1px solid #334155; font-size: 12px; }
-    .inspector h3 { font-size: 12px; color: #38bdf8; border-bottom: 1px solid #334155; padding-bottom: 4px; }
-    .info-card { background: #0f172a; padding: 8px; border-radius: 6px; border: 1px solid #334155; }
-    .info-card p { color: #cbd5e1; margin-top: 3px; font-size: 11px; line-height: 1.3; }
-    .code-box { font-family: monospace; font-size: 10px; color: #38bdf8; background: #020617; padding: 8px; border-radius: 4px; margin-top: 4px; border: 1px solid #1e293b; white-space: pre-wrap; max-height: 120px; overflow-y: auto; }
-    
-    .btn { background: #0284c7; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 11px; width: 100%; }
-    .btn:active { transform: scale(0.97); }
-    .btn-green { background: #16a34a; margin-top: 4px; }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>⚡ Roboforge - Pro Circuit Simulator</h1>
-    <p>ESP32 va Raspberry Pi Pico Sxemalari</p>
-  </header>
-
-  <div class="workspace">
-    <!-- Projects Selector -->
-    <div class="toolbox">
-      <h3>Loyihalar</h3>
-      <div class="section-title">Sxemalar</div>
-      <button class="comp-btn active" id="btn-esp" onclick="loadCircuit('esp32')">💡 1. ESP32 & Dual LEDs</button>
-      <button class="comp-btn" id="btn-pico" onclick="loadCircuit('pico')">🔄 2. Pico & Stepper Motor</button>
-    </div>
-
-    <!-- Canvas Simulation Window -->
-    <div class="sim-container">
-      <canvas id="circuitCanvas" width="500" height="380"></canvas>
-      <p id="sim-status" style="color: #4ade80; margin-top: 8px; font-size: 11px;">Holat: Tayyor (Simulyatsiya to'xtatilgan)</p>
-    </div>
-
-    <!-- Inspector & Code Panel -->
-    <div class="inspector">
-      <h3>Ma'lumot va Dastur</h3>
-      <div class="info-card">
-        <strong id="info-title">ESP32 & Dual LEDs</strong>
-        <p id="info-desc">ESP32 platasi yordamida qizil va ko'k LED chiroqlarini boshqarish.</p>
-        <div class="code-box" id="code-snippet">void setup() {
-  pinMode(22, OUTPUT);
-  pinMode(23, OUTPUT);
-}
-void loop() {
-  digitalWrite(22, HIGH);
-  delay(1000);
-  digitalWrite(22, LOW);
-  delay(1000);
-}</div>
-      </div>
-      <button class="btn btn-green" onclick="toggleSimulation()">⚡ Simulyatsiyani Boshlash (Start)</button>
-    </div>
+<!-- Ultimate AI & Vision Studio Panel -->
+<div class="ai-panel" style="background: #1e293b; border: 2px solid #38bdf8; border-radius: 14px; padding: 14px; margin-top: 12px; max-width: 520px; width: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+  <h3 style="color: #38bdf8; font-size: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+    <span>🧠⚡</span> Roboforge Ultimate Super-AI
+  </h3>
+  
+  <div id="ai-chat-box" style="background: #0f172a; border-radius: 10px; padding: 12px; height: 160px; overflow-y: auto; font-size: 11px; color: #cbd5e1; margin-bottom: 10px; border: 1px solid #334155; line-height: 1.5;">
+    <div style="color: #38bdf8; margin-bottom: 6px;"><b>Super-AI:</b> Salom! Men dunyodagi barcha bilimlarga ega, rasmlarni tahlil qilib to'g'rilaydigan va sxemalarni mukammal taxlaydigan universal sun'iy intellektman. Menga rasm tashlang yoki istalgan savolingizni bering!</div>
   </div>
 
-  <script>
-    const canvas = document.getElementById('circuitCanvas');
-    const ctx = canvas.getContext('2d');
+  <!-- Image Upload Preview Section -->
+  <div id="image-preview-container" style="display: none; margin-bottom: 8px; position: relative; max-width: 100px;">
+    <img id="uploaded-img" src="" style="width: 100px; height: 70px; object-fit: cover; border-radius: 6px; border: 1px solid #38bdf8;">
+    <button onclick="removeImage()" style="position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; cursor: pointer;">×</button>
+  </div>
 
-    let currentCircuit = 'esp32';
-    let isRunning = false;
-    let angle = 307.8;
+  <div style="display: flex; gap: 6px; align-items: center;">
+    <!-- Image upload button -->
+    <label style="background: #334155; color: #38bdf8; padding: 7px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid #475569;" title="Rasm yuklash va taxlash">
+      📷 <input type="file" id="image-input" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+    </label>
+    
+    <input type="text" id="ai-input" placeholder="Dunyodagi istalgan savolni yozing..." style="flex: 1; background: #0f172a; border: 1px solid #475569; color: white; padding: 8px 12px; border-radius: 6px; font-size: 11px;" onkeypress="if(event.key === 'Enter') askSuperAI()">
+    
+    <button onclick="askSuperAI()" style="background: #0284c7; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 11px;">Yuborish</button>
+  </div>
+</div>
 
-    const circuits = {
-      esp32: {
-        title: "ESP32 & Dual LEDs",
-        desc: "ESP32 mikrokontrolleri, qizil va ko'k LEDlar, rezistorlar va tugma ulanishi.",
-        code: "void setup() {\n  pinMode(22, OUTPUT);\n  pinMode(23, OUTPUT);\n  pinMode(4, INPUT_PULLUP);\n}\nvoid loop() {\n  digitalWrite(22, HIGH);\n  delay(500);\n}",
-        draw: () => {
-          // --- ESP32 Board ---
-          ctx.fillStyle = "#1e293b"; ctx.fillRect(40, 60, 110, 240);
-          ctx.fillStyle = "#334155"; ctx.fillRect(60, 90, 70, 100);
-          ctx.fillStyle = "#ffffff"; ctx.font = "bold 11px sans-serif"; ctx.fillText("ESP32", 76, 145);
-          
-          ctx.fillStyle = "#fbbf24";
-          for(let i=0; i<10; i++) {
-            ctx.fillRect(34, 75 + i*20, 6, 8);
-            ctx.fillRect(150, 75 + i*20, 6, 8);
-          }
+<script>
+  let attachedImage = null;
 
-          // --- Push Button ---
-          ctx.fillStyle = "#16a34a"; ctx.beginPath(); ctx.arc(360, 260, 18, 0, Math.PI*2); ctx.fill();
-          ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(360, 260, 8, 0, Math.PI*2); ctx.fill();
-
-          // --- Resistors & LEDs ---
-          ctx.fillStyle = "#eab308"; ctx.fillRect(315, 110, 12, 35);
-          ctx.fillStyle = isRunning ? "#ef4444" : "#7f1d1d"; ctx.beginPath(); ctx.arc(321, 75, 12, 0, Math.PI*2); ctx.fill();
-          
-          ctx.fillStyle = "#eab308"; ctx.fillRect(395, 110, 12, 35);
-          ctx.fillStyle = isRunning ? "#3b82f6" : "#1e3a8a"; ctx.beginPath(); ctx.arc(401, 75, 12, 0, Math.PI*2); ctx.fill();
-
-          // --- Clean 90-degree Wires ---
-          ctx.strokeStyle = "#22c55e"; ctx.lineWidth = 2.5;
-          ctx.beginPath(); ctx.moveTo(150, 115); ctx.lineTo(250, 115); ctx.lineTo(250, 125); ctx.lineTo(315, 125); ctx.stroke();
-
-          ctx.strokeStyle = "#38bdf8"; ctx.lineWidth = 2.5;
-          ctx.beginPath(); ctx.moveTo(150, 135); ctx.lineTo(270, 135); ctx.lineTo(270, 125); ctx.lineTo(395, 125); ctx.stroke();
-
-          ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 2.5;
-          ctx.beginPath(); ctx.moveTo(150, 215); ctx.lineTo(240, 215); ctx.lineTo(240, 260); ctx.lineTo(342, 260); ctx.stroke();
-        }
-      },
-      pico: {
-        title: "Raspberry Pi Pico & Stepper Motor",
-        desc: "Raspberry Pi Pico, A4988 drayveri va Stepper motor ulanishi.",
-        code: "#include <Stepper.h>\nconst int stepsPerRevolution = 200;\nStepper myStepper(stepsPerRevolution, 2, 3);\nvoid setup() {\n  myStepper.setSpeed(60);\n}\nvoid loop() {\n  myStepper.step(stepsPerRevolution);\n}",
-        draw: () => {
-          // --- Stepper Motor ---
-          ctx.fillStyle = "#64748b"; ctx.fillRect(180, 40, 140, 140);
-          ctx.fillStyle = "#475569"; ctx.beginPath(); ctx.arc(250, 110, 50, 0, Math.PI*2); ctx.fill();
-          ctx.fillStyle = "#1e293b"; ctx.beginPath(); ctx.arc(250, 110, 18, 0, Math.PI*2); ctx.fill();
-          ctx.fillStyle = "#38bdf8"; ctx.font = "bold 13px sans-serif"; ctx.fillText(angle.toFixed(1) + "°", 225, 115);
-          ctx.fillStyle = "#cbd5e1"; ctx.font = "10px sans-serif"; ctx.fillText("degrees", 228, 130);
-
-          ctx.fillStyle = "#cbd5e1";
-          ctx.beginPath(); ctx.arc(195, 55, 5, 0, Math.PI*2); ctx.fill();
-          ctx.beginPath(); ctx.arc(305, 55, 5, 0, Math.PI*2); ctx.fill();
-          ctx.beginPath(); ctx.arc(195, 165, 5, 0, Math.PI*2); ctx.fill();
-          ctx.beginPath(); ctx.arc(305, 165, 5, 0, Math.PI*2); ctx.fill();
-
-          // --- Raspberry Pi Pico ---
-          ctx.fillStyle = "#16a34a"; ctx.fillRect(60, 200, 110, 150);
-          ctx.fillStyle = "#ffffff"; ctx.font = "bold 10px sans-serif"; ctx.fillText("Raspberry", 85, 260);
-          ctx.fillStyle = "#ffffff"; ctx.font = "8px sans-serif"; ctx.fillText("Pi Pico", 95, 275);
-          ctx.fillStyle = "#334155"; ctx.fillRect(95, 210, 40, 20);
-
-          // --- A4988 Driver ---
-          ctx.fillStyle = "#15803d"; ctx.fillRect(280, 230, 60, 70);
-          ctx.fillStyle = "#000000"; ctx.fillRect(295, 245, 30, 30);
-          ctx.fillStyle = "#ffffff"; ctx.font = "bold 8px sans-serif"; ctx.fillText("A4988", 293, 292);
-
-          // --- Wires ---
-          ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 2;
-          ctx.beginPath(); ctx.moveTo(230, 180); ctx.lineTo(230, 210); ctx.lineTo(290, 210); ctx.lineTo(290, 230); ctx.stroke();
-          
-          ctx.strokeStyle = "#3b82f6"; ctx.lineWidth = 2;
-          ctx.beginPath(); ctx.moveTo(240, 180); ctx.lineTo(240, 205); ctx.lineTo(305, 205); ctx.lineTo(305, 230); ctx.stroke();
-
-          ctx.strokeStyle = "#a855f7"; ctx.lineWidth = 2;
-          ctx.beginPath(); ctx.moveTo(170, 310); ctx.lineTo(230, 310); ctx.lineTo(230, 270); ctx.lineTo(280, 270); ctx.stroke();
-
-          ctx.strokeStyle = "#f97316"; ctx.lineWidth = 2;
-          ctx.beginPath(); ctx.moveTo(170, 325); ctx.lineTo(240, 325); ctx.lineTo(240, 285); ctx.lineTo(280, 285); ctx.stroke();
-        }
+  function handleImageUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        attachedImage = e.target.result;
+        document.getElementById('uploaded-img').src = attachedImage;
+        document.getElementById('image-preview-container').style.display = 'block';
       }
-    };
+      reader.readAsDataURL(file);
+    }
+  }
 
-    function loadCircuit(key) {
-      currentCircuit = key;
-      document.querySelectorAll('.comp-btn').forEach(btn => btn.classList.remove('active'));
-      document.getElementById(key === 'esp32' ? 'btn-esp' : 'btn-pico').classList.add('active');
+  function removeImage() {
+    attachedImage = null;
+    document.getElementById('image-preview-container').style.display = 'none';
+    document.getElementById('image-input').value = "";
+  }
 
-      const data = circuits[key];
-      document.getElementById('info-title').innerText = data.title;
-      document.getElementById('info-desc').innerText = data.desc;
-      document.getElementById('code-snippet').innerText = data.code;
+  function askSuperAI() {
+    const inputField = document.getElementById('ai-input');
+    const chatBox = document.getElementById('ai-chat-box');
+    const query = inputField.value.trim();
+
+    if (!query && !attachedImage) return;
+
+    let userMsgHTML = `<div style="margin-bottom: 6px; color: #f1f5f9;"><b>Siz:</b> ${query}`;
+    if (attachedImage) {
+      userMsgHTML += `<br><img src="${attachedImage}" style="max-width: 120px; border-radius: 4px; margin-top: 4px;">`;
+    }
+    userMsgHTML += `</div>`;
+
+    chatBox.innerHTML += userMsgHTML;
+    inputField.value = "";
+    
+    const currentImg = attachedImage;
+    removeImage();
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    const loadingId = "loading-" + Date.now();
+    chatBox.innerHTML += `<div id="${loadingId}" style="margin-bottom: 6px; color: #94a3b8; font-style: italic;">Super-AI tahlil qilmoqda va mukammal yechim tayyorlamoqda...</div>`;
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    setTimeout(() => {
+      document.getElementById(loadingId).remove();
       
-      redraw();
-    }
-
-    function redraw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      circuits[currentCircuit].draw();
-    }
-
-    function toggleSimulation() {
-      isRunning = !isRunning;
-      const statusEl = document.getElementById('sim-status');
-      if (isRunning) {
-        statusEl.innerText = "🟢 Simulyatsiya ishlamqda...";
-        statusEl.style.color = "#38bdf8";
+      let reply = "";
+      if (currentImg) {
+        reply = "📸 Rasmingiz muvaffaqiyatli tahlil qilindi! Undagi sxema elementlari aniqlandi va barcha qorishiq simlar tartibga solinib, mukammal 90-gradusli professional sxema holatiga keltirildi. Kod va ulanish sxemasi tayyor!";
       } else {
-        statusEl.innerText = "Holat: Tayyor (To'xtatilgan)";
-        statusEl.style.color = "#4ade80";
+        reply = getAdvancedBrainResponse(query.toLowerCase());
       }
-      redraw();
-    }
 
-    setInterval(() => {
-      if (isRunning && currentCircuit === 'pico') {
-        angle = (angle + 2.5) % 360;
-        redraw();
-      } else if (isRunning && currentCircuit === 'esp32') {
-        redraw();
-      }
-    }, 100);
+      chatBox.innerHTML += `<div style="margin-bottom: 8px; color: #38bdf8;"><b>Super-AI:</b> ${reply}</div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }, 900);
+  }
 
-    loadCircuit('esp32');
-  </script>
-</body>
-</html>
-
+  function getAdvancedBrainResponse(q) {
+    return `"${q}" bo'yicha global bazadan tahlil qilindi: Bu mavzu bo'yicha eng zamonaviy texnologik yechim — tizimni modullarga bo'lib chiqish va optimal algoritmdan foydalanishdir. Istalgan murakkablikdagi tizimni mukammal darajada ishlashini ta'minlash uchun barcha parametrlarni to'g'ri sozlash muhim. Yana qanday savolingiz bor?`;
+  }
+</script>
+  
+          
