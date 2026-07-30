@@ -1,65 +1,93 @@
-<!DOCTYPE html>
+    
+    
+
+    <!DOCTYPE html>
 <html lang="uz">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RoboCraft 3D Assembler</title>
+  <title>Roboforge - Tinkercad Circuits Simulator</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #090d16; color: #f1f5f9; font-family: 'Segoe UI', system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 10px; }
-    header { text-align: center; margin-bottom: 10px; }
-    h1 { color: #38bdf8; font-size: 20px; }
-    p { color: #94a3b8; font-size: 12px; }
-    .main-layout { display: flex; flex-wrap: wrap; gap: 12px; max-width: 1000px; width: 100%; justify-content: center; }
-    #sim-canvas { background: #111827; border: 2px solid #0284c7; border-radius: 12px; width: 100%; max-width: 650px; height: 380px; touch-action: none; }
-    .controls { background: #1e293b; border-radius: 12px; padding: 15px; flex: 1; min-width: 280px; max-width: 350px; display: flex; flex-direction: column; gap: 12px; border: 1px solid #334155; }
-    .btn { background: #0284c7; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; }
+    body { background: #0b0f19; color: #f1f5f9; font-family: 'Segoe UI', system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 10px; }
+    header { text-align: center; margin-bottom: 8px; }
+    h1 { color: #38bdf8; font-size: 16px; }
+    p { color: #94a3b8; font-size: 11px; }
+    
+    .workspace { display: flex; flex-wrap: wrap; gap: 10px; max-width: 1200px; width: 100%; justify-content: center; }
+    
+    /* Toolbox */
+    .toolbox { background: #1e293b; border-radius: 10px; padding: 10px; width: 100%; max-width: 260px; display: flex; flex-direction: column; gap: 6px; border: 1px solid #334155; }
+    .toolbox h3 { font-size: 12px; color: #38bdf8; border-bottom: 1px solid #334155; padding-bottom: 4px; }
+    .section-title { font-size: 10px; color: #64748b; margin-top: 4px; font-weight: bold; text-transform: uppercase; }
+    .comp-btn { background: #0f172a; color: #cbd5e1; border: 1px solid #475569; padding: 7px; border-radius: 6px; text-align: left; cursor: pointer; font-size: 11px; transition: 0.2s; }
+    .comp-btn:hover { background: #0284c7; color: white; border-color: #38bdf8; }
+
+    /* 3D Canvas */
+    #sim-canvas { background: #111827; border: 2px solid #0284c7; border-radius: 10px; width: 100%; max-width: 500px; height: 380px; touch-action: none; position: relative; }
+
+    /* Inspector */
+    .inspector { background: #1e293b; border-radius: 10px; padding: 12px; flex: 1; min-width: 280px; max-width: 340px; display: flex; flex-direction: column; gap: 8px; border: 1px solid #334155; font-size: 12px; }
+    .inspector h3 { font-size: 12px; color: #38bdf8; border-bottom: 1px solid #334155; padding-bottom: 4px; }
+    .info-card { background: #0f172a; padding: 8px; border-radius: 6px; border: 1px solid #334155; }
+    .info-card p { color: #cbd5e1; margin-top: 3px; font-size: 11px; line-height: 1.3; }
+    .wiring-box { font-family: monospace; font-size: 10px; color: #4ade80; background: #020617; padding: 6px; border-radius: 4px; margin-top: 4px; border: 1px solid #1e293b; }
+    
+    .btn { background: #0284c7; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 11px; }
     .btn:active { transform: scale(0.97); }
-    .btn-secondary { background: #3b82f6; }
-    .btn-outline { background: transparent; border: 1px solid #38bdf8; color: #38bdf8; }
-    .slider-group { display: flex; flex-direction: column; gap: 6px; background: #0f172a; padding: 10px; border-radius: 8px; border: 1px solid #334155; }
-    label { font-size: 12px; color: #38bdf8; display: flex; justify-content: space-between; }
-    input[type=range] { width: 100%; accent-color: #38bdf8; cursor: pointer; }
-    .status-box { background: #0f172a; padding: 10px; border-radius: 6px; font-size: 12px; font-family: monospace; color: #4ade80; border: 1px solid #334155; }
+    .btn-green { background: #16a34a; }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 </head>
 <body>
   <header>
-    <h1>🤖 RoboCraft 3D Assembler</h1>
-    <p>Robot modullarini sochish va qayta yig'ish simulyatsiyasi</p>
+    <h1>🔌 Roboforge - Tinkercad Circuits Simulator</h1>
+    <p>Arduino va ESP32 Tayyor Ulanish Sxemalari</p>
   </header>
 
-  <div class="main-layout">
+  <div class="workspace">
+    <!-- Projects / Circuits Selector -->
+    <div class="toolbox">
+      <h3>Sxemalar va Loyihalar</h3>
+      
+      <div class="section-title">Asosiy Amaliyotlar</div>
+      <button class="comp-btn" onclick="loadCircuit('led')">🔴 1. LED va Rezistor Ulanishi</button>
+      <button class="comp-btn" onclick="loadCircuit('button')">🔘 2. Push Button (Digital Input)</button>
+      <button class="comp-btn" onclick="loadCircuit('potentiometer')">🎛️ 3. Potentiometr (Analog Input)</button>
+
+      <div class="section-title">Sensorlar va Motorlar</div>
+      <button class="comp-btn" onclick="loadCircuit('servo')">⚙️ 4. Servo Motor Boshqaruvi</button>
+      <button class="comp-btn" onclick="loadCircuit('ultrasonic')">📡 5. HC-SR04 Ultrasonik Sensor</button>
+      <button class="comp-btn" onclick="loadCircuit('esp32lcd')">📟 6. ESP32 va I2C LCD Displey</button>
+    </div>
+
+    <!-- 3D Canvas -->
     <div id="sim-canvas"></div>
 
-    <div class="controls">
-      <h3>Boshqaruv Paneli</h3>
-
-      <div class="slider-group">
-        <label for="explodeSlider">
-          <span>🧩 Sochish / Yig'ish:</span>
-          <strong id="explodeVal">0%</strong>
-        </label>
-        <input type="range" id="explodeSlider" min="0" max="100" value="0" oninput="setExplodeFactor(this.value)">
+    <!-- Inspector Panel -->
+    <div class="inspector">
+      <h3>Sxema va Ulanish Qoidalari</h3>
+      <div class="info-card" id="circuit-info">
+        <strong id="info-title">Loyihani tanlang</strong>
+        <p id="info-desc">Chap paneldan o'zingizga kerakli o'quv sxemasini tanlang.</p>
+        <div class="wiring-box" id="wiring-details">Ulanish: -</div>
       </div>
-
-      <button class="btn" onclick="animateTo(100)">🧩 To'liq Sochish</button>
-      <button class="btn btn-secondary" onclick="animateTo(0)">🛠 To'liq Yig'ish</button>
-      <button class="btn btn-outline" onclick="toggleAutoRotate()">🔄 Avto-Aylantirish</button>
-
-      <div class="status-box" id="status-log">> Robot yig'ilgan holatda. Slayderni surib ko'ring!</div>
+      <div class="info-card">
+        <strong>Simulyatsiya Holati:</strong>
+        <p id="sim-status" style="color: #4ade80;">Tayyor. Simulyatsiyani ishga tushiring.</p>
+      </div>
+      <button class="btn btn-green" onclick="runSimulation()">⚡ Tok Berish / Ishlatish (Start Simulation)</button>
     </div>
   </div>
 
   <script>
     const container = document.getElementById('sim-canvas');
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0f172a);
+    scene.background = new THREE.Color(0x0b0f19);
 
     const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-    camera.position.set(4, 3, 5);
+    camera.position.set(3, 3, 4);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(container.clientWidth, container.clientHeight);
@@ -68,109 +96,132 @@
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
-    scene.add(ambientLight);
-    const dirLight = new THREE.DirectionalLight(0x38bdf8, 1.2);
-    dirLight.position.set(5, 10, 5);
+    scene.add(new THREE.AmbientLight(0xffffff, 1));
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(5, 10, 7);
     scene.add(dirLight);
 
-    const grid = new THREE.GridHelper(10, 20, 0x0284c7, 0x1e293b);
-    grid.position.y = -1;
-    scene.add(grid);
+    let groupObjects = new THREE.Group();
+    scene.add(groupObjects);
 
-    const parts = [];
+    const circuitsData = {
+      led: {
+        title: "LED va Rezistor Ulanishi",
+        desc: "Arduino D13 pinidan chiqqan quvvat rezistor (220 Ohm) orqali LED anodiga (+) boradi, katod (-) GND ga ulanadi.",
+        wiring: "Arduino D13 -> Rezistor (220Ω) -> LED Anod (+)\nLED Katod (-) -> Arduino GND",
+        build: () => {
+          // Arduino base
+          const arduino = new THREE.Mesh(new THREE.BoxGeometry(2, 0.1, 1.5), new THREE.MeshStandardMaterial({color: 0x0284c7}));
+          arduino.position.set(0, 0, 0);
+          groupObjects.add(arduino);
+          // LED
+          const led = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.4), new THREE.MeshStandardMaterial({color: 0xef4444}));
+          led.position.set(1, 0.25, 0);
+          groupObjects.add(led);
+        }
+      },
+      button: {
+        title: "Push Button (Kнопка)",
+        desc: "Tugma bosilganda Arduino raqamli piniga HIGH (1) signali boradi, bosilmaganda LOW (0).",
+        wiring: "Button Pin 1 -> 5V\nButton Pin 2 -> Arduino D2 pin & Pull-down Rezistor -> GND",
+        build: () => {
+          const arduino = new THREE.Mesh(new THREE.BoxGeometry(2, 0.1, 1.5), new THREE.MeshStandardMaterial({color: 0x0284c7}));
+          arduino.position.set(0, 0, 0);
+          groupObjects.add(arduino);
+          const btn = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.3, 0.4), new THREE.MeshStandardMaterial({color: 0x334155}));
+          btn.position.set(0.8, 0.2, 0);
+          groupObjects.add(btn);
+        }
+      },
+      potentiometer: {
+        title: "Potentiometr (Analog Input)",
+        desc: "O'zgaruvchan rezistor yordamida A0 piniga 0 dan 5V gacha bo'lgan o'zgaruvchan analog qiymat uzatiladi.",
+        wiring: "Pin 1 -> GND | Pin 2 (O'rta) -> Arduino A0 | Pin 3 -> 5V",
+        build: () => {
+          const arduino = new THREE.Mesh(new THREE.BoxGeometry(2, 0.1, 1.5), new THREE.MeshStandardMaterial({color: 0x0284c7}));
+          arduino.position.set(0, 0, 0);
+          groupObjects.add(arduino);
+          const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.4), new THREE.MeshStandardMaterial({color: 0xeab308}));
+          pot.position.set(0.8, 0.2, 0);
+          groupObjects.add(pot);
+        }
+      },
+      servo: {
+        title: "Servo Motor Boshqaruvi (SG90)",
+        desc: "PWM signal yordamida motor burchagini 0° dan 180° gacha aniq boshqarish.",
+        wiring: "Brown (GND) -> GND\nRed (VCC) -> 5V\nOrange (SIG) -> Arduino D9 (PWM)",
+        build: () => {
+          const servo = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.8, 0.6), new THREE.MeshStandardMaterial({color: 0xf59e0b}));
+          servo.position.set(0, 0.3, 0);
+          groupObjects.add(servo);
+        }
+      },
+      ultrasonic: {
+        title: "HC-SR04 Ultrasonik Sensor",
+        desc: "Tovush to'lqinlari yordamida ob'ektgacha bo'lgan masofani santimetrda o'lchash.",
+        wiring: "VCC -> 5V | Trig -> D7 | Echo -> D6 | GND -> GND",
+        build: () => {
+          const sensor = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.5, 0.5), new THREE.MeshStandardMaterial({color: 0x3b82f6}));
+          sensor.position.set(0, 0.3, 0);
+          groupObjects.add(sensor);
+        }
+      },
+      esp32lcd: {
+        title: "ESP32 va I2C LCD Displey",
+        desc: "IoT loyihalari uchun ESP32 platasiga ma'lumotlarni LCD ekranda chiqarish.",
+        wiring: "GND->GND, VCC->3V3, SDA->GPIO21, SCL->GPIO22",
+        build: () => {
+          const esp = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.1, 2.0), new THREE.MeshStandardMaterial({color: 0x1e293b}));
+          esp.position.set(-0.8, 0, 0);
+          groupObjects.add(esp);
+          const lcd = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.2, 1.0), new THREE.MeshStandardMaterial({color: 0x10b981}));
+          lcd.position.set(0.8, 0.1, 0);
+          groupObjects.add(lcd);
+        }
+      }
+    };
 
-    function addPart(mesh, name, originPos, explodedPos) {
-      mesh.position.copy(originPos);
-      scene.add(mesh);
-      parts.push({
-        mesh: mesh,
-        name: name,
-        origin: originPos.clone(),
-        exploded: explodedPos.clone()
+    function loadCircuit(type) {
+      // Clear previous
+      while(groupObjects.children.length > 0){ 
+        groupObjects.remove(groupObjects.children[0]); 
+      }
+      
+      const data = circuitsData[type];
+      document.getElementById('info-title').innerText = data.title;
+      document.getElementById('info-desc').innerText = data.desc;
+      document.getElementById('wiring-details').innerText = data.wiring;
+      
+      data.build();
+      document.getElementById('sim-status').innerText = `${data.title} sxemasi yuklandi.`;
+    }
+
+    function runSimulation() {
+      document.getElementById('sim-status').innerText = "⚡ Tok berildi! Sxema muvaffaqiyatli ishlamqda.";
+      groupObjects.children.forEach(child => {
+        if(child.material) {
+          child.material.emissive = new THREE.Color(0x38bdf8);
+          setTimeout(() => { child.material.emissive = new THREE.Color(0x000000); }, 1000);
+        }
       });
     }
 
-    const chassisGeo = new THREE.BoxGeometry(2.2, 0.15, 3);
-    const chassisMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 });
-    const chassis = new THREE.Mesh(chassisGeo, chassisMat);
-    addPart(chassis, "Chassis", new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, -0.5, 0));
-
-    const boardGeo = new THREE.BoxGeometry(1.6, 0.1, 2);
-    const boardMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.3 });
-    const board = new THREE.Mesh(boardGeo, boardMat);
-    addPart(board, "Microcontroller", new THREE.Vector3(0, 0.15, 0), new THREE.Vector3(0, 1.2, 0));
-
-    const sensorGroup = new THREE.Group();
-    const sensorBaseGeo = new THREE.BoxGeometry(0.8, 0.3, 0.1);
-    const sensorMat = new THREE.MeshStandardMaterial({ color: 0x3b82f6 });
-    const sensorBase = new THREE.Mesh(sensorBaseGeo, sensorMat);
-    sensorGroup.add(sensorBase);
-
-    const eyeGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.15, 16);
-    const eyeMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8 });
-    const eye1 = new THREE.Mesh(eyeGeo, eyeMat);
-    eye1.rotation.x = Math.PI / 2;
-    eye1.position.set(-0.2, 0, 0.08);
-    const eye2 = eye1.clone();
-    eye2.position.set(0.2, 0, 0.08);
-    sensorGroup.add(eye1, eye2);
-    addPart(sensorGroup, "Ultrasonic Sensor", new THREE.Vector3(0, 0.3, 1.4), new THREE.Vector3(0, 1.0, 2.5));
-
-    const wheelGeo = new THREE.CylinderGeometry(0.45, 0.45, 0.2, 24);
-    const wheelMat = new THREE.MeshStandardMaterial({ color: 0xef4444 });
-    
-    const wheelL = new THREE.Mesh(wheelGeo, wheelMat);
-    wheelL.rotation.z = Math.PI / 2;
-    addPart(wheelL, "Left Wheel", new THREE.Vector3(-1.25, 0, 0.5), new THREE.Vector3(-2.3, 0, 0.5));
-
-    const wheelR = new THREE.Mesh(wheelGeo, wheelMat);
-    wheelR.rotation.z = Math.PI / 2;
-    addPart(wheelR, "Right Wheel", new THREE.Vector3(1.25, 0, 0.5), new THREE.Vector3(2.3, 0, 0.5));
-
-    const battGeo = new THREE.BoxGeometry(1.2, 0.3, 0.8);
-    const battMat = new THREE.MeshStandardMaterial({ color: 0xeab308 });
-    const batt = new THREE.Mesh(battGeo, battMat);
-    addPart(batt, "Battery", new THREE.Vector3(0, 0.25, -0.9), new THREE.Vector3(0, 1.5, -1.8));
-
-    let currentFactor = 0;
-    let targetFactor = 0;
-
-    function setExplodeFactor(val) {
-      targetFactor = val / 100;
-      document.getElementById('explodeVal').innerText = val + '%';
-    }
-
-    function animateTo(val) {
-      document.getElementById('explodeSlider').value = val;
-      setExplodeFactor(val);
-    }
-
-    function toggleAutoRotate() {
-      controls.autoRotate = !controls.autoRotate;
-    }
+    // Load first circuit by default
+    loadCircuit('led');
 
     function animate() {
       requestAnimationFrame(animate);
-      currentFactor += (targetFactor - currentFactor) * 0.1;
-
-      parts.forEach(part => {
-        part.mesh.position.lerpVectors(part.origin, part.exploded, currentFactor);
-      });
-
+      groupObjects.rotation.y += 0.003;
       controls.update();
       renderer.render(scene, camera);
     }
     animate();
 
     window.addEventListener('resize', () => {
-      const w = container.clientWidth;
-      const h = container.clientHeight;
-      renderer.setSize(w, h);
-      camera.aspect = w / h;
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      camera.aspect = container.clientWidth / container.clientHeight;
       camera.updateProjectionMatrix();
     });
   </script>
 </body>
 </html>
-
