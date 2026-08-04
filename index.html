@@ -1,4 +1,4 @@
-        <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="uz">
 <head>
 <meta charset="UTF-8">
@@ -7,103 +7,84 @@
 <style>
   :root{
     --bg:#050a0f;
-    --panel:#0a1420;
     --ring:#3ee6ff;
     --ring-dim:#0f5b6b;
     --amber:#ffb454;
+    --red:#ff6b6b;
     --text:#d9f4ff;
     --text-dim:#5c8a95;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-  html,body{
-    height:100%; margin:0;
-    background:
-      radial-gradient(ellipse at 50% -10%, #0e2530 0%, var(--bg) 55%),
-      var(--bg);
-    color:var(--text);
-    font-family:'Segoe UI', system-ui, -apple-system, sans-serif;
-    overflow:hidden;
-  }
-  body{
-    display:flex; flex-direction:column; height:100vh; height:100dvh;
-    padding: env(safe-area-inset-top) 18px env(safe-area-inset-bottom);
-  }
+  html,body{ height:100%; margin:0; background:radial-gradient(ellipse at 50% -10%, #0e2530 0%, var(--bg) 55%), var(--bg); color:var(--text); font-family:'Segoe UI', system-ui, -apple-system, sans-serif; overflow:hidden; }
+  body{ display:flex; flex-direction:column; height:100vh; height:100dvh; padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom); }
 
-  header{
-    text-align:center; padding-top:18px; flex-shrink:0;
-  }
-  .brand{
-    font-size:13px; letter-spacing:6px; color:var(--ring);
-    text-shadow:0 0 12px rgba(62,230,255,.6);
-    font-weight:600;
-  }
-  .brand small{display:block; letter-spacing:3px; color:var(--text-dim); font-size:10px; margin-top:4px;}
+  header{ text-align:center; padding-top:14px; flex-shrink:0; }
+  .brand{ font-size:13px; letter-spacing:6px; color:var(--ring); text-shadow:0 0 12px rgba(62,230,255,.6); font-weight:600; }
+  .brand small{ display:block; letter-spacing:3px; color:var(--text-dim); font-size:10px; margin-top:4px; }
 
-  main{
-    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:22px; min-height:0;
-  }
+  .mode-row{ display:flex; align-items:center; justify-content:center; gap:8px; margin-top:10px; }
+  .mode-label{ font-size:11px; letter-spacing:1.5px; color:var(--text-dim); }
+  .switch{ position:relative; width:42px; height:22px; }
+  .switch input{ opacity:0; width:0; height:0; }
+  .slider{ position:absolute; inset:0; background:#0f2530; border:1px solid var(--ring-dim); border-radius:20px; cursor:pointer; transition:.2s; }
+  .slider:before{ content:""; position:absolute; width:16px; height:16px; left:2px; top:2px; background:var(--text-dim); border-radius:50%; transition:.2s; }
+  input:checked + .slider{ background:rgba(62,230,255,.15); border-color:var(--ring); }
+  input:checked + .slider:before{ transform:translateX(20px); background:var(--ring); box-shadow:0 0 8px var(--ring); }
 
-  .core-wrap{ position:relative; width:min(62vw, 260px); aspect-ratio:1; }
+  main{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; min-height:0; }
+
+  .core-wrap{ position:relative; width:min(56vw, 230px); aspect-ratio:1; flex-shrink:0; }
   svg.rings{ width:100%; height:100%; overflow:visible; }
   .ring{ fill:none; stroke:var(--ring-dim); stroke-width:1; transform-origin:center; }
-  .ring.active{ stroke:var(--ring); filter:drop-shadow(0 0 6px rgba(62,230,255,.7)); }
   .spin-slow{ animation: spin 14s linear infinite; }
   .spin-rev{ animation: spin 9s linear infinite reverse; }
   .spin-fast{ animation: spin 5s linear infinite; }
   @keyframes spin{ to{ transform:rotate(360deg);} }
   .pulse{ animation: pulse 1.6s ease-in-out infinite; }
-  @keyframes pulse{
-    0%,100%{ transform:scale(1); opacity:1; }
-    50%{ transform:scale(1.06); opacity:.75; }
-  }
+  @keyframes pulse{ 0%,100%{ transform:scale(1); opacity:1; } 50%{ transform:scale(1.08); opacity:.7; } }
 
-  #mic-btn{
-    position:absolute; inset:0; margin:auto; width:38%; height:38%;
-    border-radius:50%; border:none; cursor:pointer;
-    background:radial-gradient(circle at 35% 30%, #123240, #061319 70%);
-    box-shadow:0 0 0 1px var(--ring-dim), 0 0 24px rgba(62,230,255,.15) inset;
-    display:flex; align-items:center; justify-content:center;
-    transition:box-shadow .25s ease, transform .15s ease;
-  }
+  #mic-btn{ position:absolute; inset:0; margin:auto; width:38%; height:38%; border-radius:50%; border:none; cursor:pointer; background:radial-gradient(circle at 35% 30%, #123240, #061319 70%); box-shadow:0 0 0 1px var(--ring-dim), 0 0 24px rgba(62,230,255,.15) inset; display:flex; align-items:center; justify-content:center; transition:box-shadow .25s ease, transform .15s ease; }
   #mic-btn:active{ transform:scale(.96); }
-  #mic-btn.listening{
-    box-shadow:0 0 0 1px var(--ring), 0 0 30px rgba(62,230,255,.55), 0 0 60px rgba(62,230,255,.25) inset;
-  }
+  #mic-btn.listening{ box-shadow:0 0 0 1px var(--ring), 0 0 30px rgba(62,230,255,.55), 0 0 60px rgba(62,230,255,.25) inset; }
+  #mic-btn.armed{ box-shadow:0 0 0 1px var(--amber), 0 0 22px rgba(255,180,84,.4); }
   #mic-btn svg{ width:46%; height:46%; }
-  #mic-btn path, #mic-btn rect{ fill:var(--ring); }
+  #mic-btn path{ fill:var(--ring); }
+  #mic-btn.armed path{ fill:var(--amber); }
 
-  #status{
-    font-size:12px; letter-spacing:3px; color:var(--text-dim); text-transform:uppercase;
-    min-height:16px; text-align:center;
-  }
+  .bars{ position:absolute; bottom:-26px; left:0; right:0; display:flex; justify-content:center; gap:3px; height:16px; }
+  .bars span{ width:3px; background:var(--ring); border-radius:2px; height:4px; opacity:.35; transition:height .12s ease, opacity .12s ease; }
+  .bars.active span{ opacity:1; animation: bar 0.9s ease-in-out infinite; }
+  .bars span:nth-child(1){ animation-delay:0s; } .bars span:nth-child(2){ animation-delay:.1s; }
+  .bars span:nth-child(3){ animation-delay:.2s; } .bars span:nth-child(4){ animation-delay:.3s; }
+  .bars span:nth-child(5){ animation-delay:.15s; } .bars span:nth-child(6){ animation-delay:.25s; }
+  .bars span:nth-child(7){ animation-delay:.05s; }
+  @keyframes bar{ 0%,100%{ height:4px; } 50%{ height:16px; } }
+
+  #status{ font-size:12px; letter-spacing:3px; color:var(--text-dim); text-transform:uppercase; min-height:16px; text-align:center; margin-top:8px; }
   #status.on{ color:var(--ring); text-shadow:0 0 8px rgba(62,230,255,.5); }
+  #status.armed{ color:var(--amber); }
+  #err{ color:var(--red); font-size:12px; text-align:center; min-height:14px; }
 
-  #transcript-box{
-    width:100%; max-width:480px; flex-shrink:0;
-    background:linear-gradient(180deg, rgba(14,37,48,.55), rgba(10,20,28,.35));
-    border:1px solid rgba(62,230,255,.15);
-    border-radius:14px;
-    padding:14px 16px;
-    max-height:34vh; overflow-y:auto;
-    font-size:14px; line-height:1.55;
-  }
+  #panels{ width:100%; max-width:480px; display:flex; flex-direction:column; gap:8px; flex-shrink:1; min-height:0; }
+
+  #active-list{ display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
+  .chip{ font-size:11px; background:rgba(62,230,255,.08); border:1px solid rgba(62,230,255,.25); color:var(--ring); padding:4px 9px; border-radius:20px; display:flex; align-items:center; gap:6px; }
+  .chip button{ background:none; border:none; color:var(--red); font-size:12px; cursor:pointer; padding:0; line-height:1; }
+
+  #transcript-box{ width:100%; background:linear-gradient(180deg, rgba(14,37,48,.55), rgba(10,20,28,.35)); border:1px solid rgba(62,230,255,.15); border-radius:14px; padding:12px 14px; max-height:26vh; overflow-y:auto; font-size:13.5px; line-height:1.5; }
   #transcript-box::-webkit-scrollbar{ width:4px; }
   #transcript-box::-webkit-scrollbar-thumb{ background:var(--ring-dim); border-radius:4px; }
-  .line{ margin-bottom:8px; }
-  .line .who{ font-weight:700; letter-spacing:1px; font-size:11px; margin-right:6px; }
+  .line{ margin-bottom:7px; }
+  .line .who{ font-weight:700; letter-spacing:1px; font-size:10.5px; margin-right:6px; }
   .line.user .who{ color:var(--amber); }
   .line.jarvis .who{ color:var(--ring); }
+  .line.ghost{ opacity:.4; }
   .line span.txt{ color:var(--text); }
-  .empty-hint{ color:var(--text-dim); font-size:13px; text-align:center; padding:6px 0; }
+  .empty-hint{ color:var(--text-dim); font-size:13px; text-align:center; padding:4px 0; }
 
-  footer{ flex-shrink:0; padding:14px 0 8px; text-align:center; }
-  .cmds{ font-size:11px; color:var(--text-dim); line-height:1.7; }
+  footer{ flex-shrink:0; padding:10px 0 6px; text-align:center; }
+  .cmds{ font-size:10.5px; color:var(--text-dim); line-height:1.6; }
   .cmds b{ color:var(--text); font-weight:600; }
-
-  #err{
-    color:#ff8a8a; font-size:12px; text-align:center; min-height:14px; margin-top:2px;
-  }
 </style>
 </head>
 <body>
@@ -111,6 +92,13 @@
 <header>
   <div class="brand">J . A . R . V . I . S .
     <small>Ovozli boshqaruv tizimi</small>
+  </div>
+  <div class="mode-row">
+    <span class="mode-label">UZLUKSIZ ("JARVIS" DEB CHAQIRING)</span>
+    <label class="switch">
+      <input type="checkbox" id="wake-toggle">
+      <span class="slider"></span>
+    </label>
   </div>
 </header>
 
@@ -124,20 +112,28 @@
     <button id="mic-btn" aria-label="Mikrofon">
       <svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3z"/><path d="M19 11a1 1 0 1 0-2 0 5 5 0 0 1-10 0 1 1 0 1 0-2 0 7 7 0 0 0 6 6.92V20H9a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2h-2v-2.08A7 7 0 0 0 19 11z"/></svg>
     </button>
+    <div class="bars" id="bars">
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
   </div>
 
   <div id="status">Tayyor — tugmani bosing</div>
   <div id="err"></div>
 
-  <div id="transcript-box">
-    <div class="empty-hint" id="empty-hint">Suhbat shu yerda ko'rinadi...</div>
+  <div id="panels">
+    <div id="active-list"></div>
+    <div id="transcript-box">
+      <div class="empty-hint" id="empty-hint">Suhbat shu yerda ko'rinadi...</div>
+    </div>
   </div>
 </main>
 
 <footer>
   <div class="cmds">
-    <b>Sinab ko'ring:</b> "soat necha", "bugun nechan sana", "12 plyus 8",<br>
-    "google'da qidir ...", "youtube och", "salom", "to'xta"
+    <b>Buyruqlar:</b> "soat necha", "sana", "12 plyus 8", "ob-havo qanday",<br>
+    "5 daqiqaga taymer qo'y", "soat 17:30 da non olish deb eslat",<br>
+    "tanga tashla", "1 dan 50 gacha son ayt", "hazil ayt", "google'da qidir ...",<br>
+    "youtube och", "qayta ayt", "tozala", "to'xta"
   </div>
 </footer>
 
@@ -148,26 +144,93 @@
   const errEl = document.getElementById('err');
   const box = document.getElementById('transcript-box');
   const emptyHint = document.getElementById('empty-hint');
+  const barsEl = document.getElementById('bars');
+  const wakeToggle = document.getElementById('wake-toggle');
+  const activeList = document.getElementById('active-list');
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   let recognizing = false;
   let recognition = null;
   let manuallyStoppedForSpeak = false;
+  let sessionActive = false;      // uzluksiz rejimda umumiy sessiya yoqilganmi
+  let wakeMode = false;           // switch holati
+  let lastJarvisLine = "Salom! Sizga qanday yordam bera olaman?";
 
-  function addLine(who, text){
+  let timers = [];    // {id, label, endTime, intervalRef}
+  let reminders = []; // {id, label, time, timeoutRef}
+  let idCounter = 1;
+
+  const JOKES = [
+    "Kompyuter nega sovuq qotib qoldi? Chunki oynasini ochib qo'yishgan edi.",
+    "O'qituvchi so'raydi: nega kechikding? O'quvchi: soat orqaga ketdi. Qaysi soat? Devordagi, endi devor ham yo'q.",
+    "Dasturchi nega yomg'irda soyabon ochmaydi? Chunki u har doim \"bug\" larga o'rgangan."
+  ];
+
+  // ---------- UI yordamchilari ----------
+
+  function addLine(who, text, ghost){
     if(emptyHint) emptyHint.remove();
     const div = document.createElement('div');
-    div.className = 'line ' + (who === 'Siz' ? 'user' : 'jarvis');
+    div.className = 'line ' + (who === 'Siz' ? 'user' : 'jarvis') + (ghost ? ' ghost' : '');
     div.innerHTML = `<span class="who">${who}:</span><span class="txt"></span>`;
     div.querySelector('.txt').textContent = text;
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
   }
 
+  function renderActiveList(){
+    activeList.innerHTML = '';
+    timers.forEach(t => {
+      const chip = document.createElement('div');
+      chip.className = 'chip';
+      chip.innerHTML = `⏱ ${t.label} <button data-id="${t.id}" data-kind="timer">✕</button>`;
+      activeList.appendChild(chip);
+    });
+    reminders.forEach(r => {
+      const chip = document.createElement('div');
+      chip.className = 'chip';
+      chip.innerHTML = `🔔 ${r.label} <button data-id="${r.id}" data-kind="reminder">✕</button>`;
+      activeList.appendChild(chip);
+    });
+    activeList.querySelectorAll('button').forEach(btn => {
+      btn.onclick = () => {
+        const id = Number(btn.dataset.id);
+        if(btn.dataset.kind === 'timer'){
+          const t = timers.find(x => x.id === id);
+          if(t) clearInterval(t.intervalRef);
+          timers = timers.filter(x => x.id !== id);
+        } else {
+          const r = reminders.find(x => x.id === id);
+          if(r) clearTimeout(r.timeoutRef);
+          reminders = reminders.filter(x => x.id !== id);
+        }
+        renderActiveList();
+      };
+    });
+  }
+
+  function beep(times){
+    times = times || 2;
+    try{
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      let t = ctx.currentTime;
+      for(let i=0;i<times;i++){
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.frequency.value = 880;
+        osc.connect(gain); gain.connect(ctx.destination);
+        gain.gain.setValueAtTime(0.15, t);
+        osc.start(t);
+        osc.stop(t + 0.18);
+        t += 0.28;
+      }
+    }catch(e){ /* audio mavjud emas */ }
+  }
+
   function speak(text){
     addLine('Jarvis', text);
+    lastJarvisLine = text;
     if(!('speechSynthesis' in window)) return;
-    // Gapirayotganda tinglashni to'xtatamiz (aks holda o'zini eshitib qoladi)
     if(recognizing){ manuallyStoppedForSpeak = true; recognition.stop(); }
     const utter = new SpeechSynthesisUtterance(text);
     utter.lang = 'uz-UZ';
@@ -175,10 +238,16 @@
     const voices = speechSynthesis.getVoices();
     const uzVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('uz'));
     const ruVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('ru'));
-    if(uzVoice) utter.voice = uzVoice;
-    else if(ruVoice) utter.voice = ruVoice;
+    if(uzVoice) utter.voice = uzVoice; else if(ruVoice) utter.voice = ruVoice;
+    utter.onend = () => {
+      if(sessionActive && wakeMode && !recognizing){
+        try{ recognition.start(); }catch(e){}
+      }
+    };
     speechSynthesis.speak(utter);
   }
+
+  // ---------- Buyruqlarni tahlil qilish ----------
 
   function tryCalculate(text){
     let t = text
@@ -191,37 +260,177 @@
     const expr = match[1];
     if(!/^[\d\.\+\-\*\/\(\)\s]+$/.test(expr)) return null;
     try{
-      // eslint-disable-next-line no-new-func
       const result = Function('"use strict"; return (' + expr + ')')();
       if(typeof result !== 'number' || !isFinite(result)) return null;
       return Math.round(result * 10000) / 10000;
     }catch(e){ return null; }
   }
 
+  function weatherCodeToText(code){
+    const map = {
+      0:"ochiq osmon", 1:"deyarli ochiq", 2:"qisman bulutli", 3:"bulutli",
+      45:"tumanli", 48:"muzli tuman", 51:"mayda yomg'ir", 61:"yomg'irli",
+      63:"o'rtacha yomg'ir", 65:"kuchli yomg'ir", 71:"qor yog'moqda",
+      80:"jala", 95:"momaqaldiroq"
+    };
+    return map[code] || "noma'lum ob-havo";
+  }
+
+  function handleWeather(){
+    if(!navigator.geolocation){
+      speak("Kechirasiz, bu qurilmada joylashuvni aniqlab bo'lmayapti.");
+      return;
+    }
+    speak("Joylashuvingizni aniqlayapman...");
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      try{
+        const {latitude, longitude} = pos.coords;
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const cw = data.current_weather;
+        if(cw){
+          const desc = weatherCodeToText(cw.weathercode);
+          speak(`Hozir havo harorati ${Math.round(cw.temperature)} daraja, ${desc}, shamol tezligi ${Math.round(cw.windspeed)} km/soat.`);
+        } else {
+          speak("Ob-havo ma'lumotini olib bo'lmadi.");
+        }
+      }catch(e){
+        speak("Ob-havo ma'lumotini olishda xatolik yuz berdi. Internetni tekshiring.");
+      }
+    }, () => {
+      speak("Joylashuvga ruxsat berilmadi, shuning uchun ob-havoni aniqlay olmayman.");
+    });
+  }
+
+  function fmtDuration(totalSec){
+    const m = Math.floor(totalSec/60);
+    const s = totalSec%60;
+    return (m>0 ? m+" daq " : "") + s + " son";
+  }
+
+  function handleTimer(cmd){
+    let sec = null;
+    let m = cmd.match(/(\d+)\s*(soniya|sekund)/);
+    if(m){ sec = parseInt(m[1]); }
+    m = cmd.match(/(\d+)\s*(daqiqa|minut)/);
+    if(m){ sec = (sec||0) + parseInt(m[1])*60; }
+    m = cmd.match(/(\d+)\s*soat/);
+    if(m){ sec = (sec||0) + parseInt(m[1])*3600; }
+
+    if(sec === null || sec <= 0){
+      speak("Taymer davomiyligini tushunmadim. Masalan: besh daqiqaga taymer qo'y.");
+      return;
+    }
+    const id = idCounter++;
+    const endTime = Date.now() + sec*1000;
+    const label = fmtDuration(sec);
+    const entry = { id, label, endTime, intervalRef: null };
+    entry.intervalRef = setInterval(() => {
+      const remain = Math.max(0, Math.round((entry.endTime - Date.now())/1000));
+      entry.label = fmtDuration(remain);
+      renderActiveList();
+      if(remain <= 0){
+        clearInterval(entry.intervalRef);
+        timers = timers.filter(t => t.id !== id);
+        renderActiveList();
+        beep(4);
+        speak(`Taymer tugadi: ${label}`);
+      }
+    }, 1000);
+    timers.push(entry);
+    renderActiveList();
+    speak(`${label} lik taymer qo'ydim.`);
+  }
+
+  function handleReminder(cmd){
+    const tMatch = cmd.match(/(\d{1,2})[:\.](\d{2})/);
+    if(!tMatch){
+      speak("Eslatma vaqtini tushunmadim. Masalan: soat o'n yettida non olish deb eslat.");
+      return;
+    }
+    const hh = parseInt(tMatch[1]);
+    const mm = parseInt(tMatch[2]);
+    let msg = cmd.split(/da\b/).slice(1).join('da');
+    msg = msg.replace(/deb eslat.*|eslat.*/,'').trim();
+    if(!msg) msg = "eslatma vaqti keldi";
+
+    const now = new Date();
+    const target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hh, mm, 0, 0);
+    if(target <= now) target.setDate(target.getDate()+1);
+    const delay = target - now;
+
+    const id = idCounter++;
+    const label = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')} — ${msg}`;
+    const timeoutRef = setTimeout(() => {
+      reminders = reminders.filter(r => r.id !== id);
+      renderActiveList();
+      beep(3);
+      speak(`Eslatma: ${msg}`);
+    }, delay);
+    reminders.push({ id, label, timeoutRef });
+    renderActiveList();
+    speak(`Yaxshi, soat ${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')} da "${msg}" haqida eslataman.`);
+  }
+
   function handleCommand(cmdRaw){
     const cmd = cmdRaw.toLowerCase();
 
-    if(/(chiq|to'?xta|yopil|xayr|stop)/.test(cmd)){
+    if(/(chiq|to'?xta(ma)?|yopil|xayr|stop)/.test(cmd) && !cmd.includes('taymer')){
       speak("Xayr! Yaxshi kun tilayman.");
+      if(sessionActive){ sessionActive = false; wakeToggle.checked = false; wakeMode = false; if(recognition) recognition.stop(); }
+      return;
+    }
+    if(cmd.includes('tozala')){
+      box.innerHTML = '';
+      addLine('Jarvis', 'Suhbat tozalandi.');
+      return;
+    }
+    if(cmd.includes('qayta ayt')){
+      speak(lastJarvisLine);
       return;
     }
     if(cmd.includes('soat') && (cmd.includes('necha') || cmd.includes('vaqt'))){
       const now = new Date();
-      const h = String(now.getHours()).padStart(2,'0');
-      const m = String(now.getMinutes()).padStart(2,'0');
-      speak(`Hozir soat ${h}:${m}`);
+      speak(`Hozir soat ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`);
       return;
     }
     if(cmd.includes('sana') || cmd.includes('bugun nechan')){
       const now = new Date();
-      const d = String(now.getDate()).padStart(2,'0');
-      const mo = String(now.getMonth()+1).padStart(2,'0');
-      const y = now.getFullYear();
-      speak(`Bugungi sana: ${d}.${mo}.${y}`);
+      speak(`Bugungi sana: ${String(now.getDate()).padStart(2,'0')}.${String(now.getMonth()+1).padStart(2,'0')}.${now.getFullYear()}`);
       return;
     }
-    if(/salom|assalomu|hi\b/.test(cmd)){
+    if(/salom|assalomu|^hi\b/.test(cmd)){
       speak("Salom! Sizga qanday yordam bera olaman?");
+      return;
+    }
+    if(cmd.includes('ob-havo') || cmd.includes('ob havo') || cmd.includes('havo qanday')){
+      handleWeather();
+      return;
+    }
+    if(cmd.includes('taymer')){
+      handleTimer(cmd);
+      return;
+    }
+    if(cmd.includes('eslat')){
+      handleReminder(cmd);
+      return;
+    }
+    if(cmd.includes('tanga')){
+      const result = Math.random() < 0.5 ? "Bosh" : "Raqam";
+      speak(`Tanga tashlandi: ${result}`);
+      return;
+    }
+    if(cmd.includes('tasodifiy son') || /\d+\s*dan\s*\d+\s*gacha/.test(cmd)){
+      let min = 1, max = 100;
+      const rangeMatch = cmd.match(/(\d+)\s*dan\s*(\d+)\s*gacha/);
+      if(rangeMatch){ min = parseInt(rangeMatch[1]); max = parseInt(rangeMatch[2]); }
+      const num = Math.floor(Math.random()*(max-min+1))+min;
+      speak(`Tasodifiy son: ${num}`);
+      return;
+    }
+    if(cmd.includes('hazil')){
+      speak(JOKES[Math.floor(Math.random()*JOKES.length)]);
       return;
     }
     const calc = tryCalculate(cmd);
@@ -247,11 +456,17 @@
     speak("Kechirasiz, buni tushunmadim. Yana urinib ko'ring.");
   }
 
-  function setListeningUI(on){
+  // ---------- Tanish (recognition) boshqaruvi ----------
+
+  function setListeningUI(on, armed){
     recognizing = on;
-    micBtn.classList.toggle('listening', on);
-    statusEl.classList.toggle('on', on);
-    statusEl.textContent = on ? 'Tinglayapman...' : 'Tayyor — tugmani bosing';
+    micBtn.classList.toggle('listening', on && !armed);
+    micBtn.classList.toggle('armed', !!armed);
+    barsEl.classList.toggle('active', on);
+    statusEl.classList.toggle('on', on && !armed);
+    statusEl.classList.toggle('armed', !!armed);
+    if(armed) statusEl.textContent = '"Jarvis" deb chaqiring...';
+    else statusEl.textContent = on ? 'Tinglayapman...' : (sessionActive ? '"Jarvis" deb chaqiring...' : 'Tayyor — tugmani bosing');
     document.getElementById('r3').classList.toggle('pulse', on);
   }
 
@@ -260,6 +475,7 @@
     errEl.textContent = 'Iltimos, Chrome brauzerida oching (Android).';
     micBtn.disabled = true;
     micBtn.style.opacity = .4;
+    wakeToggle.disabled = true;
   } else {
     recognition = new SpeechRecognition();
     recognition.lang = 'uz-UZ';
@@ -267,45 +483,85 @@
     recognition.maxAlternatives = 1;
     recognition.continuous = false;
 
-    recognition.onstart = () => { errEl.textContent=''; setListeningUI(true); };
+    recognition.onstart = () => { errEl.textContent=''; setListeningUI(true, false); };
+
     recognition.onerror = (e) => {
-      setListeningUI(false);
+      setListeningUI(false, sessionActive);
       if(e.error === 'not-allowed' || e.error === 'service-not-allowed'){
         errEl.textContent = 'Mikrofonga ruxsat berilmadi. Brauzer sozlamalaridan ruxsat bering.';
+        sessionActive = false; wakeToggle.checked = false; wakeMode = false;
       } else if(e.error === 'no-speech'){
-        errEl.textContent = 'Hech narsa eshitilmadi. Yana urinib ko\'ring.';
+        // uzluksiz rejimda jim davom etamiz, xato ko'rsatmaymiz
+        if(!sessionActive) errEl.textContent = "Hech narsa eshitilmadi. Yana urinib ko'ring.";
       } else if(e.error === 'language-not-supported'){
-        errEl.textContent = 'O\'zbek tili qo\'llab-quvvatlanmadi, ruscha urinib ko\'raman.';
+        errEl.textContent = "O'zbek tili qo'llab-quvvatlanmadi, ruscha urinib ko'raman.";
         recognition.lang = 'ru-RU';
-      } else {
+      } else if(e.error !== 'aborted'){
         errEl.textContent = 'Xatolik: ' + e.error;
       }
     };
+
     recognition.onend = () => {
-      setListeningUI(false);
-      if(manuallyStoppedForSpeak){ manuallyStoppedForSpeak = false; }
+      setListeningUI(false, sessionActive);
+      if(manuallyStoppedForSpeak){ manuallyStoppedForSpeak = false; return; }
+      if(sessionActive){
+        try{ recognition.start(); }catch(e){}
+      }
     };
+
     recognition.onresult = (event) => {
       const text = event.results[0][0].transcript;
-      addLine('Siz', text);
-      handleCommand(text);
+      if(sessionActive && wakeMode){
+        const lower = text.toLowerCase();
+        if(lower.includes('jarvis') || lower.includes('jarvish') || lower.includes('javis')){
+          const stripped = lower.replace(/.*?jarvi[sh]?/, '').trim();
+          addLine('Siz', text);
+          if(stripped){ handleCommand(stripped); }
+          else { speak('Eshitaman.'); }
+        } else {
+          addLine('Siz', text, true);
+        }
+      } else {
+        addLine('Siz', text);
+        handleCommand(text);
+      }
     };
 
     micBtn.addEventListener('click', () => {
+      if(wakeMode){
+        // uzluksiz rejimda tugma sessiyani yoqadi/o'chiradi
+        if(sessionActive){
+          sessionActive = false;
+          if(recognizing) recognition.stop();
+          setListeningUI(false, false);
+        } else {
+          sessionActive = true;
+          try{ recognition.continuous = false; recognition.start(); }catch(e){}
+        }
+        return;
+      }
       if(recognizing){
         recognition.stop();
       } else {
-        try{ recognition.start(); }
-        catch(e){ /* already started */ }
+        try{ recognition.start(); }catch(e){}
+      }
+    });
+
+    wakeToggle.addEventListener('change', () => {
+      wakeMode = wakeToggle.checked;
+      if(!wakeMode && sessionActive){
+        sessionActive = false;
+        if(recognizing) recognition.stop();
+      }
+      setListeningUI(recognizing, sessionActive);
+      if(wakeMode){
+        addLine('Jarvis', 'Uzluksiz rejim yoqildi. Mikrofon tugmasini bosib sessiyani boshlang, so\'ng "Jarvis" deb chaqiring.');
       }
     });
   }
 
-  // Ovozlar kech yuklanishi mumkin
-  if('speechSynthesis' in window){
-    speechSynthesis.onvoiceschanged = () => {};
-  }
+  if('speechSynthesis' in window){ speechSynthesis.onvoiceschanged = () => {}; }
 })();
 </script>
 </body>
-    </html>
+</html>
