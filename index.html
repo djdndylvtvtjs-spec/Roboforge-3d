@@ -1,231 +1,184 @@
-<!DOCTYPE html>
-<html lang="uz">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RoboCraft AI - Virtual Robototexnika Laboratoriyasi</title>
-    <style>
-        :root {
-            --bg-color: #0d1117;
-            --panel-bg: #161b22;
-            --accent-color: #58a6ff;
-            --text-color: #c9d1d9;
-            --border-color: #30363d;
-        }
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
-        /* Chap panel: Komponentlar */
-        .sidebar {
-            width: 250px;
-            background-color: var(--panel-bg);
-            border-right: 1px solid var(--border-color);
-            padding: 20px;
-        }
-        .sidebar h2 {
-            font-size: 1.2rem;
-            margin-bottom: 15px;
-            color: var(--accent-color);
-        }
-        .component-item {
-            background: #21262d;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 6px;
-            cursor: pointer;
-            border: 1px solid var(--border-color);
-            transition: 0.2s;
-        }
-        .component-item:hover {
-            border-color: var(--accent-color);
-        }
-        /* Markaziy qism: Simulyatsiya maydoni */
-        .main-workspace {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        .header {
-            height: 60px;
-            background-color: var(--panel-bg);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-        }
-        .canvas {
-            flex: 1;
-            background: radial-gradient(circle, #21262d 1px, transparent 1px);
-            background-size: 20px 20px;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .canvas-placeholder {
-            text-align: center;
-            color: #8b949e;
-        }
-        /* O'ng panel: Jarvis AI Assistant */
-        .ai-panel {
-            width: 350px;
-            background-color: var(--panel-bg);
-            border-left: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-        }
-        .ai-header {
-            padding: 15px 20px;
-            border-bottom: 1px solid var(--border-color);
-            font-weight: bold;
-            color: var(--accent-color);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .chat-box {
-            flex: 1;
-            padding: 15px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .message {
-            padding: 10px 14px;
-            border-radius: 8px;
-            max-width: 85%;
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-        .message.ai {
-            background-color: #21262d;
-            border: 1px solid var(--border-color);
-            align-self: flex-start;
-        }
-        .message.user {
-            background-color: #1f6feb;
-            color: white;
-            align-self: flex-end;
-        }
-        .chat-input-area {
-            padding: 15px;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            gap: 10px;
-        }
-        .chat-input-area input {
-            flex: 1;
-            background: #0d1117;
-            border: 1px solid var(--border-color);
-            padding: 10px;
-            border-radius: 6px;
-            color: white;
-            outline: none;
-        }
-        .chat-input-area input:focus {
-            border-color: var(--accent-color);
-        }
-        .chat-input-area button {
-            background: var(--accent-color);
-            border: none;
-            padding: 0 15px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            color: #0d1117;
-        }
-    </style>
-</head>
-<body>
+"""
+JARVIS - Ovozli boshqariladigan shaxsiy yordamchi
+====================================================
+Mikrofon orqali buyruqlarni tinglaydi, ularni tanib oladi va
+tovush (nutq) orqali javob qaytaradi.
 
-    <!-- Komponentlar paneli -->
-    <div class="sidebar">
-        <h2>Komponentlar</h2>
-        <div class="component-item">🔌 Arduino UNO</div>
-        <div class="component-item">🔋 ESP32 Moduli</div>
-        <div class="component-item">📡 Ultrasonic Sensor (HC-SR04)</div>
-        <div class="component-item">🚗 L298N Motor Drayver</div>
-        <div class="component-item">⚙️ Servo Motor</div>
-    </div>
+O'rnatish (terminalda ishga tushiring):
+    pip install SpeechRecognition pyttsx3 pyaudio
 
-    <!-- Asosiy ishchi maydon -->
-    <div class="main-workspace">
-        <div class="header">
-            <h3>RoboCraft AI - Workspace</h3>
-            <span style="font-size: 0.85rem; color: #8b949e;">Status: Tayyor 🚀</span>
-        </div>
-        <div class="canvas">
-            <div class="canvas-placeholder">
-                <h2>Sxemani shu yerga yig'ing</h2>
-                <p>Komponentlarni tanlab, simulyatsiyani boshlang</p>
-            </div>
-        </div>
-    </div>
+Eslatma (Windows uchun pyaudio o'rnatishda muammo bo'lsa):
+    pip install pipwin
+    pipwin install pyaudio
 
-    <!-- Jarvis AI Assistant paneli -->
-    <div class="ai-panel">
-        <div class="ai-header">
-            <span>🤖 Jarvis AI Assistant</span>
-        </div>
-        <div class="chat-box" id="chatBox">
-            <div class="message ai">Assalomu alaykum! Men Jarvis, sizning RoboCraft bo'yicha sun'iy intellekt yordamchingizman. Qanday vazifani hal qilamiz?</div>
-        </div>
-        <div class="chat-input-area">
-            <input type="text" id="userInput" placeholder="Savol yoki buyruq yozing..." onkeypress="handleKeyPress(event)">
-            <button onclick="sendMessage()">Yuborish</button>
-        </div>
-    </div>
+Ishga tushirish:
+    python jarvis.py
+"""
 
-    <script>
-        function sendMessage() {
-            const input = document.getElementById('userInput');
-            const chatBox = document.getElementById('chatBox');
+import speech_recognition as sr
+import pyttsx3
+import datetime
+import webbrowser
+import sys
+import math
+import re
+
+
+class Jarvis:
+    def __init__(self, name="Jarvis", language="uz-UZ", wake_word=None):
+        self.name = name
+        self.language = language  # nutqni tanish tili (masalan "uz-UZ", "ru-RU", "en-US")
+        self.wake_word = wake_word  # masalan "jarvis" — agar kerak bo'lsa
+
+        # Nutqni matnga aylantiruvchi
+        self.recognizer = sr.Recognizer()
+        self.microphone = sr.Microphone()
+
+        # Matnni nutqqa aylantiruvchi (offline ishlaydi)
+        self.engine = pyttsx3.init()
+        self.engine.setProperty("rate", 175)  # gapirish tezligi
+        voices = self.engine.getProperty("voices")
+        if voices:
+            self.engine.setProperty("voice", voices[0].id)
+
+        # Fon shovqiniga moslashish
+        with self.microphone as source:
+            self.recognizer.adjust_for_ambient_noise(source, duration=1)
+
+    # ---------- Asosiy funksiyalar ----------
+
+    def speak(self, text: str):
+        """Matnni ovoz orqali aytadi va konsolga ham chiqaradi."""
+        print(f"{self.name}: {text}")
+        self.engine.say(text)
+        self.engine.runAndWait()
+
+    def listen(self, timeout=5, phrase_time_limit=8) -> str:
+        """Mikrofondan tinglaydi va matnga aylantiradi."""
+        with self.microphone as source:
+            print("... tinglayapman ...")
+            try:
+                audio = self.recognizer.listen(
+                    source, timeout=timeout, phrase_time_limit=phrase_time_limit
+                )
+            except sr.WaitTimeoutError:
+                return ""
+
+        try:
+            text = self.recognizer.recognize_google(audio, language=self.language)
+            print(f"Siz: {text}")
+            return text.lower()
+        except sr.UnknownValueError:
+            return ""
+        except sr.RequestError:
+            self.speak("Internet ulanishida muammo bor, buyruqni tushuna olmadim.")
+            return ""
+
+    # ---------- Buyruqlarni bajarish ----------
+
+    def handle_command(self, command: str) -> bool:
+        """
+        Buyruqni tahlil qiladi va bajaradi.
+        False qaytarsa - dastur to'xtaydi.
+        """
+        if not command:
+            return True
+
+        # Chiqish
+        if any(word in command for word in ["chiq", "to'xta", "yopil", "xayr", "stop", "exit"]):
+            self.speak("Xayr! Yaxshi kun tilayman.")
+            return False
+
+        # Vaqtni aytish
+        if "soat" in command and ("necha" in command or "vaqt" in command):
+            now = datetime.datetime.now().strftime("%H:%M")
+            self.speak(f"Hozir soat {now}")
+            return True
+
+        # Sanani aytish
+        if "sana" in command or "bugun nechan" in command:
+            today = datetime.datetime.now().strftime("%d.%m.%Y")
+            self.speak(f"Bugungi sana: {today}")
+            return True
+
+        # Salomlashish
+        if any(word in command for word in ["salom", "assalomu", "hey jarvis", "hi"]):
+            self.speak("Salom! Sizga qanday yordam bera olaman?")
+            return True
+
+        # Hisob-kitob (masalan: "hisobla 12 ko'paytirilgan 5" yoki "2 + 2 nechiga teng")
+        calc_result = self.try_calculate(command)
+        if calc_result is not None:
+            self.speak(f"Natija: {calc_result}")
+            return True
+
+        # Google'da qidirish: "google'da qidir python nima"
+        if "qidir" in command or "izla" in command:
+            query = re.sub(r".*(qidir|izla)", "", command).strip()
+            if query:
+                self.speak(f"{query} bo'yicha qidiryapman")
+                webbrowser.open(f"https://www.google.com/search?q={query}")
+            return True
+
+        # Saytni ochish
+        if "yout" in command:
+            self.speak("YouTube ochyapman")
+            webbrowser.open("https://youtube.com")
+            return True
+
+        # Hech narsa mos kelmasa
+        self.speak("Kechirasiz, buni tushunmadim. Yana urinib ko'ring.")
+        return True
+
+    def try_calculate(self, command: str):
+        """Oddiy matematik ifodalarni topib hisoblaydi (masalan '12 + 5', '10 * 3')."""
+        # So'zlarni belgilarga aylantirish
+        replacements = {
+            "qo'shish": "+", "qoshish": "+", "plyus": "+",
+            "ayirish": "-", "minus": "-",
+            "ko'paytirish": "*", "kopaytirish": "*", "carpa": "*",
+            "bo'lish": "/", "bolish": "/",
+        }
+        text = command
+        for word, symbol in replacements.items():
+            text = text.replace(word, symbol)
+
+        # Faqat raqam va operatorlardan iborat qismini ajratib olish
+        match = re.search(r"(-?\d+(\.\d+)?\s*[\+\-\*/]\s*-?\d+(\.\d+)?)", text)
+        if not match:
+            return None
+
+        expr = match.group(1)
+        # Xavfsiz baholash: faqat raqamlar va + - * / ( ) belgilariga ruxsat
+        if not re.fullmatch(r"[\d\.\+\-\*/\(\)\s]+", expr):
+            return None
+
+        try:
+            result = eval(expr, {"__builtins__": {}}, {})
+            return round(result, 4) if isinstance(result, float) else result
+        except Exception:
+            return None
+
+    # ---------- Asosiy sikl ----------
+
+    def run(self):
+        self.speak(f"{self.name} tayyor. Sizni tinglayapman.")
+        running = True
+        while running:
+            command = self.listen()
+            running = self.handle_command(command)
+
+
+if __name__ == "__main__":
+    # Tilni o'zgartirish uchun language parametrini almashtiring:
+    #   O'zbekcha  -> "uz-UZ"
+    #   Ruscha     -> "ru-RU"
+    #   Inglizcha  -> "en-US"
+    jarvis = Jarvis(name="Jarvis", language="uz-UZ")
+    try:
+        jarvis.run()
+    except KeyboardInterrupt:
+        print("\nDastur to'xtatildi.")
+        sys.exit(0)
             
-            if (input.value.trim() === "") return;
-
-            // Foydalanuvchi xabari
-            const userMsg = document.createElement('div');
-            userMsg.className = 'message user';
-            userMsg.textContent = input.value;
-            chatBox.appendChild(userMsg);
-
-            const query = input.value;
-            input.value = '';
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            // Jarvis AI javobi simulyatsiyasi
-            setTimeout(() => {
-                const aiMsg = document.createElement('div');
-                aiMsg.className = 'message ai';
-                
-                if (query.toLowerCase().includes('arduino') || query.toLowerCase().includes('kod')) {
-                    aiMsg.textContent = "Arduino uchun kod tekshirildi. Sensor portlari to'g'ri ulangan, simulyatsiyani ishga tushirishingiz mumkin!";
-                } else {
-                    aiMsg.textContent = "Tushunarli. Loyihangizni yanada mukammal qilish uchun ushbu qismga e'tibor qaratamiz.";
-                }
-                
-                chatBox.appendChild(aiMsg);
-                chatBox.scrollTop = chatBox.scrollHeight;
-            }, 1000);
-        }
-
-        function handleKeyPress(event) {
-            if (event.key === 'Enter') {
-                sendMessage();
-            }
-        }
-    </script>
-</body>
-</html>
+    
