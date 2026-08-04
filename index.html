@@ -1,184 +1,311 @@
-"""
-JARVIS - Ovozli boshqariladigan shaxsiy yordamchi
-====================================================
-Mikrofon orqali buyruqlarni tinglaydi, ularni tanib oladi va
-tovush (nutq) orqali javob qaytaradi.
+        <!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>J.A.R.V.I.S.</title>
+<style>
+  :root{
+    --bg:#050a0f;
+    --panel:#0a1420;
+    --ring:#3ee6ff;
+    --ring-dim:#0f5b6b;
+    --amber:#ffb454;
+    --text:#d9f4ff;
+    --text-dim:#5c8a95;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{
+    height:100%; margin:0;
+    background:
+      radial-gradient(ellipse at 50% -10%, #0e2530 0%, var(--bg) 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Segoe UI', system-ui, -apple-system, sans-serif;
+    overflow:hidden;
+  }
+  body{
+    display:flex; flex-direction:column; height:100vh; height:100dvh;
+    padding: env(safe-area-inset-top) 18px env(safe-area-inset-bottom);
+  }
 
-O'rnatish (terminalda ishga tushiring):
-    pip install SpeechRecognition pyttsx3 pyaudio
+  header{
+    text-align:center; padding-top:18px; flex-shrink:0;
+  }
+  .brand{
+    font-size:13px; letter-spacing:6px; color:var(--ring);
+    text-shadow:0 0 12px rgba(62,230,255,.6);
+    font-weight:600;
+  }
+  .brand small{display:block; letter-spacing:3px; color:var(--text-dim); font-size:10px; margin-top:4px;}
 
-Eslatma (Windows uchun pyaudio o'rnatishda muammo bo'lsa):
-    pip install pipwin
-    pipwin install pyaudio
+  main{
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:22px; min-height:0;
+  }
 
-Ishga tushirish:
-    python jarvis.py
-"""
+  .core-wrap{ position:relative; width:min(62vw, 260px); aspect-ratio:1; }
+  svg.rings{ width:100%; height:100%; overflow:visible; }
+  .ring{ fill:none; stroke:var(--ring-dim); stroke-width:1; transform-origin:center; }
+  .ring.active{ stroke:var(--ring); filter:drop-shadow(0 0 6px rgba(62,230,255,.7)); }
+  .spin-slow{ animation: spin 14s linear infinite; }
+  .spin-rev{ animation: spin 9s linear infinite reverse; }
+  .spin-fast{ animation: spin 5s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg);} }
+  .pulse{ animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse{
+    0%,100%{ transform:scale(1); opacity:1; }
+    50%{ transform:scale(1.06); opacity:.75; }
+  }
 
-import speech_recognition as sr
-import pyttsx3
-import datetime
-import webbrowser
-import sys
-import math
-import re
+  #mic-btn{
+    position:absolute; inset:0; margin:auto; width:38%; height:38%;
+    border-radius:50%; border:none; cursor:pointer;
+    background:radial-gradient(circle at 35% 30%, #123240, #061319 70%);
+    box-shadow:0 0 0 1px var(--ring-dim), 0 0 24px rgba(62,230,255,.15) inset;
+    display:flex; align-items:center; justify-content:center;
+    transition:box-shadow .25s ease, transform .15s ease;
+  }
+  #mic-btn:active{ transform:scale(.96); }
+  #mic-btn.listening{
+    box-shadow:0 0 0 1px var(--ring), 0 0 30px rgba(62,230,255,.55), 0 0 60px rgba(62,230,255,.25) inset;
+  }
+  #mic-btn svg{ width:46%; height:46%; }
+  #mic-btn path, #mic-btn rect{ fill:var(--ring); }
 
+  #status{
+    font-size:12px; letter-spacing:3px; color:var(--text-dim); text-transform:uppercase;
+    min-height:16px; text-align:center;
+  }
+  #status.on{ color:var(--ring); text-shadow:0 0 8px rgba(62,230,255,.5); }
 
-class Jarvis:
-    def __init__(self, name="Jarvis", language="uz-UZ", wake_word=None):
-        self.name = name
-        self.language = language  # nutqni tanish tili (masalan "uz-UZ", "ru-RU", "en-US")
-        self.wake_word = wake_word  # masalan "jarvis" — agar kerak bo'lsa
+  #transcript-box{
+    width:100%; max-width:480px; flex-shrink:0;
+    background:linear-gradient(180deg, rgba(14,37,48,.55), rgba(10,20,28,.35));
+    border:1px solid rgba(62,230,255,.15);
+    border-radius:14px;
+    padding:14px 16px;
+    max-height:34vh; overflow-y:auto;
+    font-size:14px; line-height:1.55;
+  }
+  #transcript-box::-webkit-scrollbar{ width:4px; }
+  #transcript-box::-webkit-scrollbar-thumb{ background:var(--ring-dim); border-radius:4px; }
+  .line{ margin-bottom:8px; }
+  .line .who{ font-weight:700; letter-spacing:1px; font-size:11px; margin-right:6px; }
+  .line.user .who{ color:var(--amber); }
+  .line.jarvis .who{ color:var(--ring); }
+  .line span.txt{ color:var(--text); }
+  .empty-hint{ color:var(--text-dim); font-size:13px; text-align:center; padding:6px 0; }
 
-        # Nutqni matnga aylantiruvchi
-        self.recognizer = sr.Recognizer()
-        self.microphone = sr.Microphone()
+  footer{ flex-shrink:0; padding:14px 0 8px; text-align:center; }
+  .cmds{ font-size:11px; color:var(--text-dim); line-height:1.7; }
+  .cmds b{ color:var(--text); font-weight:600; }
 
-        # Matnni nutqqa aylantiruvchi (offline ishlaydi)
-        self.engine = pyttsx3.init()
-        self.engine.setProperty("rate", 175)  # gapirish tezligi
-        voices = self.engine.getProperty("voices")
-        if voices:
-            self.engine.setProperty("voice", voices[0].id)
+  #err{
+    color:#ff8a8a; font-size:12px; text-align:center; min-height:14px; margin-top:2px;
+  }
+</style>
+</head>
+<body>
 
-        # Fon shovqiniga moslashish
-        with self.microphone as source:
-            self.recognizer.adjust_for_ambient_noise(source, duration=1)
+<header>
+  <div class="brand">J . A . R . V . I . S .
+    <small>Ovozli boshqaruv tizimi</small>
+  </div>
+</header>
 
-    # ---------- Asosiy funksiyalar ----------
+<main>
+  <div class="core-wrap">
+    <svg class="rings" viewBox="0 0 200 200">
+      <circle id="r1" class="ring spin-slow" cx="100" cy="100" r="95" stroke-dasharray="4 10"/>
+      <circle id="r2" class="ring spin-rev" cx="100" cy="100" r="80" stroke-dasharray="2 6"/>
+      <circle id="r3" class="ring spin-fast" cx="100" cy="100" r="66" stroke-dasharray="1 200"/>
+    </svg>
+    <button id="mic-btn" aria-label="Mikrofon">
+      <svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3z"/><path d="M19 11a1 1 0 1 0-2 0 5 5 0 0 1-10 0 1 1 0 1 0-2 0 7 7 0 0 0 6 6.92V20H9a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2h-2v-2.08A7 7 0 0 0 19 11z"/></svg>
+    </button>
+  </div>
 
-    def speak(self, text: str):
-        """Matnni ovoz orqali aytadi va konsolga ham chiqaradi."""
-        print(f"{self.name}: {text}")
-        self.engine.say(text)
-        self.engine.runAndWait()
+  <div id="status">Tayyor — tugmani bosing</div>
+  <div id="err"></div>
 
-    def listen(self, timeout=5, phrase_time_limit=8) -> str:
-        """Mikrofondan tinglaydi va matnga aylantiradi."""
-        with self.microphone as source:
-            print("... tinglayapman ...")
-            try:
-                audio = self.recognizer.listen(
-                    source, timeout=timeout, phrase_time_limit=phrase_time_limit
-                )
-            except sr.WaitTimeoutError:
-                return ""
+  <div id="transcript-box">
+    <div class="empty-hint" id="empty-hint">Suhbat shu yerda ko'rinadi...</div>
+  </div>
+</main>
 
-        try:
-            text = self.recognizer.recognize_google(audio, language=self.language)
-            print(f"Siz: {text}")
-            return text.lower()
-        except sr.UnknownValueError:
-            return ""
-        except sr.RequestError:
-            self.speak("Internet ulanishida muammo bor, buyruqni tushuna olmadim.")
-            return ""
+<footer>
+  <div class="cmds">
+    <b>Sinab ko'ring:</b> "soat necha", "bugun nechan sana", "12 plyus 8",<br>
+    "google'da qidir ...", "youtube och", "salom", "to'xta"
+  </div>
+</footer>
 
-    # ---------- Buyruqlarni bajarish ----------
+<script>
+(function(){
+  const micBtn = document.getElementById('mic-btn');
+  const statusEl = document.getElementById('status');
+  const errEl = document.getElementById('err');
+  const box = document.getElementById('transcript-box');
+  const emptyHint = document.getElementById('empty-hint');
 
-    def handle_command(self, command: str) -> bool:
-        """
-        Buyruqni tahlil qiladi va bajaradi.
-        False qaytarsa - dastur to'xtaydi.
-        """
-        if not command:
-            return True
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recognizing = false;
+  let recognition = null;
+  let manuallyStoppedForSpeak = false;
 
-        # Chiqish
-        if any(word in command for word in ["chiq", "to'xta", "yopil", "xayr", "stop", "exit"]):
-            self.speak("Xayr! Yaxshi kun tilayman.")
-            return False
+  function addLine(who, text){
+    if(emptyHint) emptyHint.remove();
+    const div = document.createElement('div');
+    div.className = 'line ' + (who === 'Siz' ? 'user' : 'jarvis');
+    div.innerHTML = `<span class="who">${who}:</span><span class="txt"></span>`;
+    div.querySelector('.txt').textContent = text;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+  }
 
-        # Vaqtni aytish
-        if "soat" in command and ("necha" in command or "vaqt" in command):
-            now = datetime.datetime.now().strftime("%H:%M")
-            self.speak(f"Hozir soat {now}")
-            return True
+  function speak(text){
+    addLine('Jarvis', text);
+    if(!('speechSynthesis' in window)) return;
+    // Gapirayotganda tinglashni to'xtatamiz (aks holda o'zini eshitib qoladi)
+    if(recognizing){ manuallyStoppedForSpeak = true; recognition.stop(); }
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'uz-UZ';
+    utter.rate = 1;
+    const voices = speechSynthesis.getVoices();
+    const uzVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('uz'));
+    const ruVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('ru'));
+    if(uzVoice) utter.voice = uzVoice;
+    else if(ruVoice) utter.voice = ruVoice;
+    speechSynthesis.speak(utter);
+  }
 
-        # Sanani aytish
-        if "sana" in command or "bugun nechan" in command:
-            today = datetime.datetime.now().strftime("%d.%m.%Y")
-            self.speak(f"Bugungi sana: {today}")
-            return True
+  function tryCalculate(text){
+    let t = text
+      .replace(/qo'shish|qoshish|plyus/g, '+')
+      .replace(/ayirish|minus/g, '-')
+      .replace(/ko'paytirish|kopaytirish|marta/g, '*')
+      .replace(/bo'lish|bolish/g, '/');
+    const match = t.match(/(-?\d+(\.\d+)?\s*[\+\-\*\/]\s*-?\d+(\.\d+)?)/);
+    if(!match) return null;
+    const expr = match[1];
+    if(!/^[\d\.\+\-\*\/\(\)\s]+$/.test(expr)) return null;
+    try{
+      // eslint-disable-next-line no-new-func
+      const result = Function('"use strict"; return (' + expr + ')')();
+      if(typeof result !== 'number' || !isFinite(result)) return null;
+      return Math.round(result * 10000) / 10000;
+    }catch(e){ return null; }
+  }
 
-        # Salomlashish
-        if any(word in command for word in ["salom", "assalomu", "hey jarvis", "hi"]):
-            self.speak("Salom! Sizga qanday yordam bera olaman?")
-            return True
+  function handleCommand(cmdRaw){
+    const cmd = cmdRaw.toLowerCase();
 
-        # Hisob-kitob (masalan: "hisobla 12 ko'paytirilgan 5" yoki "2 + 2 nechiga teng")
-        calc_result = self.try_calculate(command)
-        if calc_result is not None:
-            self.speak(f"Natija: {calc_result}")
-            return True
+    if(/(chiq|to'?xta|yopil|xayr|stop)/.test(cmd)){
+      speak("Xayr! Yaxshi kun tilayman.");
+      return;
+    }
+    if(cmd.includes('soat') && (cmd.includes('necha') || cmd.includes('vaqt'))){
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2,'0');
+      const m = String(now.getMinutes()).padStart(2,'0');
+      speak(`Hozir soat ${h}:${m}`);
+      return;
+    }
+    if(cmd.includes('sana') || cmd.includes('bugun nechan')){
+      const now = new Date();
+      const d = String(now.getDate()).padStart(2,'0');
+      const mo = String(now.getMonth()+1).padStart(2,'0');
+      const y = now.getFullYear();
+      speak(`Bugungi sana: ${d}.${mo}.${y}`);
+      return;
+    }
+    if(/salom|assalomu|hi\b/.test(cmd)){
+      speak("Salom! Sizga qanday yordam bera olaman?");
+      return;
+    }
+    const calc = tryCalculate(cmd);
+    if(calc !== null){
+      speak(`Natija: ${calc}`);
+      return;
+    }
+    if(cmd.includes('qidir') || cmd.includes('izla')){
+      const query = cmd.replace(/.*(qidir|izla)/, '').trim();
+      if(query){
+        speak(`${query} bo'yicha qidiryapman`);
+        window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
+      } else {
+        speak("Nimani qidirishni aytmadingiz.");
+      }
+      return;
+    }
+    if(cmd.includes('yout')){
+      speak("YouTube ochyapman");
+      window.open('https://youtube.com', '_blank');
+      return;
+    }
+    speak("Kechirasiz, buni tushunmadim. Yana urinib ko'ring.");
+  }
 
-        # Google'da qidirish: "google'da qidir python nima"
-        if "qidir" in command or "izla" in command:
-            query = re.sub(r".*(qidir|izla)", "", command).strip()
-            if query:
-                self.speak(f"{query} bo'yicha qidiryapman")
-                webbrowser.open(f"https://www.google.com/search?q={query}")
-            return True
+  function setListeningUI(on){
+    recognizing = on;
+    micBtn.classList.toggle('listening', on);
+    statusEl.classList.toggle('on', on);
+    statusEl.textContent = on ? 'Tinglayapman...' : 'Tayyor — tugmani bosing';
+    document.getElementById('r3').classList.toggle('pulse', on);
+  }
 
-        # Saytni ochish
-        if "yout" in command:
-            self.speak("YouTube ochyapman")
-            webbrowser.open("https://youtube.com")
-            return True
+  if(!SpeechRecognition){
+    statusEl.textContent = 'Bu brauzer ovozni tanib olmaydi';
+    errEl.textContent = 'Iltimos, Chrome brauzerida oching (Android).';
+    micBtn.disabled = true;
+    micBtn.style.opacity = .4;
+  } else {
+    recognition = new SpeechRecognition();
+    recognition.lang = 'uz-UZ';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.continuous = false;
 
-        # Hech narsa mos kelmasa
-        self.speak("Kechirasiz, buni tushunmadim. Yana urinib ko'ring.")
-        return True
+    recognition.onstart = () => { errEl.textContent=''; setListeningUI(true); };
+    recognition.onerror = (e) => {
+      setListeningUI(false);
+      if(e.error === 'not-allowed' || e.error === 'service-not-allowed'){
+        errEl.textContent = 'Mikrofonga ruxsat berilmadi. Brauzer sozlamalaridan ruxsat bering.';
+      } else if(e.error === 'no-speech'){
+        errEl.textContent = 'Hech narsa eshitilmadi. Yana urinib ko\'ring.';
+      } else if(e.error === 'language-not-supported'){
+        errEl.textContent = 'O\'zbek tili qo\'llab-quvvatlanmadi, ruscha urinib ko\'raman.';
+        recognition.lang = 'ru-RU';
+      } else {
+        errEl.textContent = 'Xatolik: ' + e.error;
+      }
+    };
+    recognition.onend = () => {
+      setListeningUI(false);
+      if(manuallyStoppedForSpeak){ manuallyStoppedForSpeak = false; }
+    };
+    recognition.onresult = (event) => {
+      const text = event.results[0][0].transcript;
+      addLine('Siz', text);
+      handleCommand(text);
+    };
 
-    def try_calculate(self, command: str):
-        """Oddiy matematik ifodalarni topib hisoblaydi (masalan '12 + 5', '10 * 3')."""
-        # So'zlarni belgilarga aylantirish
-        replacements = {
-            "qo'shish": "+", "qoshish": "+", "plyus": "+",
-            "ayirish": "-", "minus": "-",
-            "ko'paytirish": "*", "kopaytirish": "*", "carpa": "*",
-            "bo'lish": "/", "bolish": "/",
-        }
-        text = command
-        for word, symbol in replacements.items():
-            text = text.replace(word, symbol)
+    micBtn.addEventListener('click', () => {
+      if(recognizing){
+        recognition.stop();
+      } else {
+        try{ recognition.start(); }
+        catch(e){ /* already started */ }
+      }
+    });
+  }
 
-        # Faqat raqam va operatorlardan iborat qismini ajratib olish
-        match = re.search(r"(-?\d+(\.\d+)?\s*[\+\-\*/]\s*-?\d+(\.\d+)?)", text)
-        if not match:
-            return None
-
-        expr = match.group(1)
-        # Xavfsiz baholash: faqat raqamlar va + - * / ( ) belgilariga ruxsat
-        if not re.fullmatch(r"[\d\.\+\-\*/\(\)\s]+", expr):
-            return None
-
-        try:
-            result = eval(expr, {"__builtins__": {}}, {})
-            return round(result, 4) if isinstance(result, float) else result
-        except Exception:
-            return None
-
-    # ---------- Asosiy sikl ----------
-
-    def run(self):
-        self.speak(f"{self.name} tayyor. Sizni tinglayapman.")
-        running = True
-        while running:
-            command = self.listen()
-            running = self.handle_command(command)
-
-
-if __name__ == "__main__":
-    # Tilni o'zgartirish uchun language parametrini almashtiring:
-    #   O'zbekcha  -> "uz-UZ"
-    #   Ruscha     -> "ru-RU"
-    #   Inglizcha  -> "en-US"
-    jarvis = Jarvis(name="Jarvis", language="uz-UZ")
-    try:
-        jarvis.run()
-    except KeyboardInterrupt:
-        print("\nDastur to'xtatildi.")
-        sys.exit(0)
-            
-    
+  // Ovozlar kech yuklanishi mumkin
+  if('speechSynthesis' in window){
+    speechSynthesis.onvoiceschanged = () => {};
+  }
+})();
+</script>
+</body>
+    </html>
